@@ -18,16 +18,25 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
   const { data: details, isLoading: isLoadingDetails } = useQuery({
     queryKey: ['placeDetails', place.name],
     queryFn: async () => {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/maps/search-v3?query=${encodeURIComponent(place.name)}&limit=1&async=false`, {
+      console.log('Fetching details for:', place.name);
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/maps/search-v3?query=${encodeURIComponent(place.name)}&limit=1&async=false&fields=business_status,price_level,business_hours,reviews`, {
         headers: {
           'X-API-KEY': import.meta.env.VITE_API_KEY,
         },
       });
-      if (!response.ok) throw new Error('Failed to fetch details');
+      if (!response.ok) {
+        console.error('API Error:', response.status);
+        throw new Error('Failed to fetch details');
+      }
       const data = await response.json();
-      return data.data[0][0]; // Get the first result from the first query
+      console.log('API Response:', data);
+      if (!data.data?.[0]?.[0]) {
+        throw new Error('No details found');
+      }
+      return data.data[0][0];
     },
-    enabled: isExpanded, // Only fetch when expanded
+    enabled: isExpanded,
+    retry: 1,
   });
 
   return (
@@ -92,52 +101,50 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
                 <div className="flex justify-center py-4">
                   <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
-              ) : (
-                details && (
-                  <>
-                    {details.business_status && (
-                      <p className="text-sm">
-                        <Info className="inline-block h-4 w-4 mr-2" />
-                        Status: {details.business_status}
-                      </p>
-                    )}
-                    {details.price_level && (
-                      <p className="text-sm">
-                        <DollarSign className="inline-block h-4 w-4 mr-2" />
-                        Price Level: {'$'.repeat(details.price_level)}
-                      </p>
-                    )}
-                    {details.working_hours && (
-                      <div className="text-sm">
-                        <Clock className="inline-block h-4 w-4 mr-2" />
-                        <span className="font-medium">Opening Hours:</span>
-                        <ul className="ml-6 mt-1">
-                          {details.working_hours.map((hour: string, index: number) => (
-                            <li key={index}>{hour}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {details.reviews && (
-                      <div className="text-sm mt-4">
-                        <Users className="inline-block h-4 w-4 mr-2" />
-                        <span className="font-medium">Recent Reviews:</span>
-                        <div className="ml-6 mt-2 space-y-3">
-                          {details.reviews.slice(0, 3).map((review: any, index: number) => (
-                            <div key={index} className="border-l-2 border-gray-200 pl-3">
-                              <div className="flex items-center gap-1">
-                                <Star className="h-4 w-4 text-yellow-500" fill="currentColor" />
-                                <span>{review.rating}</span>
-                              </div>
-                              <p className="text-gray-600 mt-1">{review.text}</p>
+              ) : details ? (
+                <>
+                  {details.business_status && (
+                    <p className="text-sm">
+                      <Info className="inline-block h-4 w-4 mr-2" />
+                      Status: {details.business_status}
+                    </p>
+                  )}
+                  {details.price_level && (
+                    <p className="text-sm">
+                      <DollarSign className="inline-block h-4 w-4 mr-2" />
+                      Price Level: {'$'.repeat(details.price_level)}
+                    </p>
+                  )}
+                  {details.business_hours && (
+                    <div className="text-sm">
+                      <Clock className="inline-block h-4 w-4 mr-2" />
+                      <span className="font-medium">Opening Hours:</span>
+                      <ul className="ml-6 mt-1">
+                        {details.business_hours.map((hour: string, index: number) => (
+                          <li key={index}>{hour}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                  {details.reviews && details.reviews.length > 0 && (
+                    <div className="text-sm mt-4">
+                      <Users className="inline-block h-4 w-4 mr-2" />
+                      <span className="font-medium">Recent Reviews:</span>
+                      <div className="ml-6 mt-2 space-y-3">
+                        {details.reviews.slice(0, 3).map((review: any, index: number) => (
+                          <div key={index} className="border-l-2 border-gray-200 pl-3">
+                            <div className="flex items-center gap-1">
+                              <Star className="h-4 w-4 text-yellow-500" fill="currentColor" />
+                              <span>{review.rating}</span>
                             </div>
-                          ))}
-                        </div>
+                            <p className="text-gray-600 mt-1">{review.text}</p>
+                          </div>
+                        ))}
                       </div>
-                    )}
-                  </>
-                )
-              )}
+                    </div>
+                  )}
+                </>
+              ) : null}
             </div>
           )}
         </div>
