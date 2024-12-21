@@ -19,8 +19,13 @@ const Index = () => {
     
     setIsLoading(true);
     setIsOpen(true);
-    setCurrentBrand(brand);
-    setCurrentLocation(location);
+    window.parent.postMessage({ 
+      type: 'MODAL_OPEN',
+      data: {
+        brand,
+        location,
+      }
+    }, '*');
     
     try {
       const results = await searchPlaces({ brand, location });
@@ -68,18 +73,25 @@ const Index = () => {
     }
   };
 
+  const handleDialogChange = (open: boolean) => {
+    setIsOpen(open);
+    if (!open) {
+      window.parent.postMessage({ type: 'MODAL_CLOSE' }, '*');
+    }
+  };
+
   return (
     <div className="h-screen w-full bg-background">
       <AppSidebar onSearch={handleSearch} isLoading={isLoading} />
       
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={isOpen} onOpenChange={handleDialogChange}>
         <DialogContent className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] sm:w-[calc(100%-4rem)] md:w-full md:max-w-3xl max-h-[80vh] md:max-h-[85vh] overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-200 p-4 sm:p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg sm:text-xl font-semibold">Search Results</h2>
             <Button 
               variant="ghost" 
               size="icon" 
-              onClick={() => setIsOpen(false)}
+              onClick={() => handleDialogChange(false)}
               className="hover:bg-gray-100"
             >
               <X className="h-4 w-4" />
