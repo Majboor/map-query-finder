@@ -30,8 +30,8 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
     const updateBounds = () => {
       const windowWidth = window.innerWidth;
       setBounds({
-        right: windowWidth - 64, // Width when collapsed
-        left: windowWidth - 256 // Width when expanded
+        right: windowWidth - 64,
+        left: windowWidth - 256
       });
     };
 
@@ -52,7 +52,9 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
 
   const toggleSearch = () => {
     setShowSearch(!showSearch);
-    setIsExpanded(true);
+    if (!showSearch) {
+      setIsExpanded(true);
+    }
   };
 
   const handleSearch = async (query: string, location: string) => {
@@ -85,7 +87,7 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
     >
       <div 
         className={cn(
-          "fixed top-0 z-50 transition-transform duration-300 ease-in-out cursor-move",
+          "fixed top-0 z-50 transition-all duration-300 ease-in-out cursor-move",
           isExpanded ? "w-64" : "w-16",
           "bg-white rounded-l-lg shadow-lg"
         )}
@@ -101,37 +103,39 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
             <SidebarMenuItem>
               <SidebarMenuButton
                 className={cn(
-                  "w-full flex items-center gap-2 p-2 rounded-md hover:bg-gray-100",
+                  "w-full flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-all duration-300",
                   isExpanded ? "justify-start" : "justify-start px-4"
                 )}
               >
                 <Grid className="w-6 h-6 text-blue-500" />
-                <span className={cn("text-sm font-medium", !isExpanded && "hidden")}>AI</span>
+                <span className={cn("text-sm font-medium transition-opacity duration-300", !isExpanded && "opacity-0")}>AI</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
 
-            {isExpanded && (
-              <>
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    onClick={toggleSearch}
-                    className="w-full flex items-center gap-2 p-2 rounded-md hover:bg-gray-100"
-                  >
-                    <Search className="w-6 h-6" />
-                    <span className="text-sm font-medium">Look for listings</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                onClick={toggleSearch}
+                className={cn(
+                  "w-full flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-all duration-300",
+                  isExpanded ? "justify-start" : "justify-start px-4"
+                )}
+              >
+                <Search className="w-6 h-6" />
+                <span className={cn("text-sm font-medium transition-opacity duration-300", !isExpanded && "opacity-0")}>Look for listings</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
 
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    className="w-full flex items-center gap-2 p-2 rounded-md hover:bg-gray-100"
-                  >
-                    <MessageSquare className="w-6 h-6" />
-                    <span className="text-sm font-medium">Chat</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </>
-            )}
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                className={cn(
+                  "w-full flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-all duration-300",
+                  isExpanded ? "justify-start" : "justify-start px-4"
+                )}
+              >
+                <MessageSquare className="w-6 h-6" />
+                <span className={cn("text-sm font-medium transition-opacity duration-300", !isExpanded && "opacity-0")}>Chat</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
           </SidebarMenu>
         </div>
 
