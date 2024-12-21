@@ -18,15 +18,14 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
   const { data: details, isLoading: isLoadingDetails } = useQuery({
     queryKey: ['placeDetails', place.name],
     queryFn: async () => {
-      // This query will only run when isExpanded is true
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/maps/reviews-v3?query=${encodeURIComponent(place.name)}&async=false`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/maps/search-v3?query=${encodeURIComponent(place.name)}&limit=1&async=false`, {
         headers: {
           'X-API-KEY': import.meta.env.VITE_API_KEY,
         },
       });
       if (!response.ok) throw new Error('Failed to fetch details');
       const data = await response.json();
-      return data.data[0];
+      return data.data[0][0]; // Get the first result from the first query
     },
     enabled: isExpanded, // Only fetch when expanded
   });
@@ -108,12 +107,12 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
                         Price Level: {'$'.repeat(details.price_level)}
                       </p>
                     )}
-                    {details.opening_hours && (
+                    {details.working_hours && (
                       <div className="text-sm">
                         <Clock className="inline-block h-4 w-4 mr-2" />
                         <span className="font-medium">Opening Hours:</span>
                         <ul className="ml-6 mt-1">
-                          {details.opening_hours.map((hour: string, index: number) => (
+                          {details.working_hours.map((hour: string, index: number) => (
                             <li key={index}>{hour}</li>
                           ))}
                         </ul>
