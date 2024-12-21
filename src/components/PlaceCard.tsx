@@ -34,10 +34,9 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
     };
 
     const validateFirstImage = async () => {
+      setValidImage(null); // Reset validImage state before checking
       if (place["Brand Images"]?.[0] && place["Brand Images"][0] !== 'N/A') {
         await checkImage(place["Brand Images"][0]);
-      } else {
-        setValidImage(null);
       }
     };
 
