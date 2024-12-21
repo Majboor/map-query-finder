@@ -24,11 +24,8 @@ const Wrapper = () => {
     setResponse(null);
 
     try {
-      // Combine query and location into a single search string
-      const searchQuery = `${query} ${location}`.trim();
-      
       const params = new URLSearchParams({
-        query: searchQuery,
+        query: `${query} ${location}`,
         limit: limit,
         async: "false",
         language: "en",
@@ -37,14 +34,7 @@ const Wrapper = () => {
       });
 
       console.log("API Request URL:", `https://api.app.outscraper.com/maps/search-v3?${params}`);
-      console.log("Query Parameters:", {
-        query: searchQuery,
-        limit: limit,
-        async: "false",
-        language: "en",
-        region: "AU",
-        dropDuplicates: "true"
-      });
+      console.log("Query Parameters:", Object.fromEntries(params));
 
       const response = await fetch(`https://api.app.outscraper.com/maps/search-v3?${params}`, {
         headers: {
@@ -52,18 +42,51 @@ const Wrapper = () => {
         },
       });
 
-      if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
+      // Handle different response statuses according to the API documentation
+      switch (response.status) {
+        case 200:
+          const data = await response.json();
+          console.log("Original API Response:", data);
+          
+          if (data.status === "Success" && data.data) {
+            const reformattedData = reformatResponse(data);
+            console.log("Reformatted Response:", reformattedData);
+            setResponse(reformattedData);
+            toast.success("API call successful!");
+          } else {
+            throw new Error("Invalid response format from API");
+          }
+          break;
+          
+        case 202:
+          const asyncData = await response.json();
+          setError(`Async request initiated. Request ID: ${asyncData.id}`);
+          toast.info("Async request initiated - results will be available later");
+          break;
+          
+        case 204:
+          setError("Request finished with no results");
+          toast.warning("No results found");
+          break;
+          
+        case 401:
+          setError("Invalid API Key");
+          toast.error("Invalid API Key");
+          break;
+          
+        case 402:
+          setError("Payment required - Check your API subscription");
+          toast.error("Payment required");
+          break;
+          
+        case 422:
+          setError("Invalid query parameters");
+          toast.error("Invalid query parameters");
+          break;
+          
+        default:
+          throw new Error(`Unexpected response status: ${response.status}`);
       }
-
-      const data = await response.json();
-      console.log("Original API Response:", data);
-      
-      const reformattedData = reformatResponse(data);
-      console.log("Reformatted Response:", reformattedData);
-      
-      setResponse(reformattedData);
-      toast.success("API call successful!");
     } catch (err) {
       console.error("API Error:", err);
       setError(err instanceof Error ? err.message : "An error occurred");
@@ -146,7 +169,7 @@ const Wrapper = () => {
 
           {response && (
             <div className="mt-4 space-y-2">
-              <p className="font-medium">Reformatted API Response:</p>
+              <p className="font-medium">API Response:</p>
               <pre className="p-4 bg-gray-50 rounded-md overflow-auto max-h-96">
                 {JSON.stringify(response, null, 2)}
               </pre>
