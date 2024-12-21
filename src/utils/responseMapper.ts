@@ -1,38 +1,38 @@
 export const reformatResponse = (data: any) => {
+  // Initial validation
   if (!data || !Array.isArray(data.data)) {
+    console.log("Invalid or empty response data");
     return { results: [] };
   }
 
-  // Handle the case where data.data is an array of arrays (multiple queries)
+  // Handle multiple query responses (data.data might contain multiple arrays)
   const resultsArray = Array.isArray(data.data[0]) ? data.data : [data.data];
   
   const allResults = resultsArray.flatMap(resultSet => {
     return resultSet.map((place: any) => {
-      // Process working hours from the API response
+      // Process working hours from popular_times
       const workingHours: Record<string, string> = {};
-      
-      // Extract working hours from popular_times
       if (place.popular_times) {
         place.popular_times.forEach((day: any) => {
-          const dayText = day.day_text;
+          const dayText = day.day_text || "Unknown";
           const hours = day.popular_times;
-          if (hours && hours.length > 0) {
+          if (hours?.length) {
             const openHours = hours.filter((h: any) => h.percentage > 0);
             if (openHours.length > 0) {
               workingHours[dayText] = `${openHours[0].time}-${openHours[openHours.length - 1].time}`;
             } else {
-              workingHours[dayText] = 'Closed';
+              workingHours[dayText] = "Closed";
             }
           } else {
-            workingHours[dayText] = 'Closed';
+            workingHours[dayText] = "Closed";
           }
         });
       }
 
-      // Extract description from various possible locations
+      // Extract description from various possible sources
       const description = 
-        place.description || 
-        place.about?.description || 
+        place.description ||
+        place.about?.description ||
         place.about?.["From the business"]?.description ||
         (place.reviews_tags?.length > 0 ? place.reviews_tags.join(", ") : "N/A");
 
@@ -45,7 +45,7 @@ export const reformatResponse = (data: any) => {
       if (place.site) socialMediaLinks.push(place.site);
       if (place.owner_link) socialMediaLinks.push(place.owner_link);
 
-      // Extract images, ensuring they are valid URLs
+      // Extract and validate images
       const brandImages = [
         place.logo,
         place.photo,
@@ -53,6 +53,7 @@ export const reformatResponse = (data: any) => {
         ...(place.photos || [])
       ].filter(img => img && img !== 'N/A' && typeof img === 'string');
 
+      // Map the final object with all necessary fields
       return {
         "Business Name": place.name || "N/A",
         "Business Address": place.full_address || "N/A",
@@ -77,5 +78,6 @@ export const reformatResponse = (data: any) => {
     });
   });
 
+  console.log("Processed results:", allResults);
   return { results: allResults };
 };
