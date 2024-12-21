@@ -24,9 +24,32 @@ const Wrapper = () => {
     const place = data.data[0];
     if (!place) return { results: [] };
 
-    // Convert working_hours to our expected format
+    // Process working hours from the API response
     const workingHours = place.working_hours || {};
-    
+    const defaultHours = {
+      "Monday": "Closed",
+      "Tuesday": "Closed",
+      "Wednesday": "Closed",
+      "Thursday": "Closed",
+      "Friday": "Closed",
+      "Saturday": "Closed",
+      "Sunday": "Closed"
+    };
+
+    // Extract working hours from popular_times if working_hours is not available
+    if (!place.working_hours && place.popular_times) {
+      place.popular_times.forEach((day: any) => {
+        const dayText = day.day_text;
+        const hours = day.popular_times;
+        if (hours && hours.length > 0) {
+          const openHours = hours.filter((h: any) => h.percentage > 0);
+          if (openHours.length > 0) {
+            workingHours[dayText] = `${openHours[0].time}-${openHours[openHours.length - 1].time}`;
+          }
+        }
+      });
+    }
+
     // Map the API response to our expected format
     return {
       results: [{
@@ -42,15 +65,7 @@ const Wrapper = () => {
           place.logo || "N/A",
           place.photo || "N/A"
         ],
-        "Hours": workingHours || {
-          "Monday": "Closed",
-          "Tuesday": "Closed",
-          "Wednesday": "Closed",
-          "Thursday": "Closed",
-          "Friday": "Closed",
-          "Saturday": "Closed",
-          "Sunday": "Closed"
-        },
+        "Hours": { ...defaultHours, ...workingHours },
         "Category": place.type || "N/A",
         "Tagline": place.type || "N/A",
         "Owner Name": place.owner_title || "N/A",
@@ -71,7 +86,8 @@ const Wrapper = () => {
         limit: "1",
         async: "false",
         language: "en",
-        region: "AU"
+        region: "AU",
+        dropDuplicates: "true"
       });
 
       console.log("API Request URL:", `https://api.app.outscraper.com/maps/search-v3?${params}`);
@@ -80,7 +96,8 @@ const Wrapper = () => {
         limit: "1",
         async: "false",
         language: "en",
-        region: "AU"
+        region: "AU",
+        dropDuplicates: "true"
       });
 
       const response = await fetch(`https://api.app.outscraper.com/maps/search-v3?${params}`, {
