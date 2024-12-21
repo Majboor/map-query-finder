@@ -39,7 +39,7 @@ export interface PlaceData {
   posts?: any | null;
   reviews_tags?: string[];
   rating?: number;
-  reviews?: number;
+  reviews?: Review[];  // Changed from number to array of Review
   photos_count?: number;
   cid: string;
   reviews_link: string;
@@ -50,6 +50,7 @@ export interface PlaceData {
   working_hours_old_format?: string;
   other_hours?: any | null;
   business_status?: string;
+  price_level?: number;  // Added price_level
   about?: {
     Accessibility?: Record<string, boolean>;
     Payments?: Record<string, boolean>;
@@ -66,6 +67,11 @@ export interface PlaceData {
   owner_link?: string;
   location_link?: string;
   location_reviews_link?: string;
+}
+
+export interface Review {
+  rating: number;
+  text: string;
 }
 
 export interface PopularTimesDay {

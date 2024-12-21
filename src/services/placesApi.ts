@@ -22,6 +22,8 @@ const mapApiResponseToPlace = (placeData: any): Place => {
   };
 };
 
+export { type Place };  // Export the Place type
+
 export const searchPlaces = async ({ query, location, limit = 1, skipPlaces = 0 }: SearchParams): Promise<Place[]> => {
   try {
     // Ensure skipPlaces is a multiple of 20
