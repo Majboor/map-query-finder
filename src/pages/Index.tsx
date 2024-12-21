@@ -68,7 +68,7 @@ const Index = () => {
       </div>
       
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="fixed right-[4.5rem] top-1/2 -translate-y-1/2 max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="fixed left-4 top-1/2 -translate-y-1/2 max-w-3xl max-h-[80vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Search Results</h2>
             <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
