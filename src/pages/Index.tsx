@@ -74,7 +74,7 @@ const Index = () => {
       <AppSidebar onSearch={handleSearch} isLoading={isLoading} />
       
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="fixed inset-x-4 sm:inset-x-8 md:inset-x-auto md:mx-auto top-1/2 -translate-y-1/2 w-[calc(100%-2rem)] sm:w-[calc(100%-4rem)] md:w-full md:max-w-3xl max-h-[80vh] md:max-h-[85vh] overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-200 p-4 sm:p-6">
+        <DialogContent className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] sm:w-[calc(100%-4rem)] md:w-full md:max-w-3xl max-h-[80vh] md:max-h-[85vh] overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-200 p-4 sm:p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg sm:text-xl font-semibold">Search Results</h2>
             <Button 
