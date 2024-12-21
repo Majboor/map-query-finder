@@ -51,11 +51,10 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
   };
 
   const toggleSearch = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent event from bubbling up
+    e.preventDefault();
+    e.stopPropagation();
     setShowSearch(!showSearch);
-    if (!showSearch) {
-      setIsExpanded(true);
-    }
+    setIsExpanded(true);
   };
 
   const handleSearch = async (query: string, location: string) => {
@@ -80,7 +79,15 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
   };
 
   const handleSidebarClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent event from bubbling
+    e.preventDefault();
+    e.stopPropagation();
+    setIsExpanded(true);
+  };
+
+  const handleButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsExpanded(true);
   };
 
   return (
@@ -111,6 +118,7 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
                   "w-full flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-all duration-300",
                   isExpanded ? "justify-start" : "justify-start px-4"
                 )}
+                onClick={handleButtonClick}
               >
                 <Grid className="w-6 h-6 text-blue-500" />
                 <span className={cn(
@@ -142,6 +150,7 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
                   "w-full flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-all duration-300",
                   isExpanded ? "justify-start" : "justify-start px-4"
                 )}
+                onClick={handleButtonClick}
               >
                 <MessageSquare className="w-6 h-6" />
                 <span className={cn(
@@ -154,7 +163,7 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
         </div>
 
         {showSearch && (
-          <div className="p-4 border-t">
+          <div className="p-4 border-t" onClick={handleSidebarClick}>
             <SearchForm onSearch={handleSearch} isLoading={isLoading} />
           </div>
         )}
