@@ -24,6 +24,10 @@ const Wrapper = () => {
     const place = data.data[0];
     if (!place) return { results: [] };
 
+    // Convert working_hours to our expected format
+    const workingHours = place.working_hours || {};
+    
+    // Map the API response to our expected format
     return {
       results: [{
         "Business Name": place.name || "N/A",
@@ -38,7 +42,7 @@ const Wrapper = () => {
           place.logo || "N/A",
           place.photo || "N/A"
         ],
-        "Hours": place.working_hours || {
+        "Hours": workingHours || {
           "Monday": "Closed",
           "Tuesday": "Closed",
           "Wednesday": "Closed",
@@ -48,7 +52,10 @@ const Wrapper = () => {
           "Sunday": "Closed"
         },
         "Category": place.type || "N/A",
-        "Tagline": place.type || "N/A"
+        "Tagline": place.type || "N/A",
+        "Owner Name": place.owner_title || "N/A",
+        "Verified": place.verified || false,
+        "Owner Link": place.owner_link || "N/A"
       }]
     };
   };
@@ -63,6 +70,8 @@ const Wrapper = () => {
         query: `${query}, ${location}`,
         limit: "1",
         async: "false",
+        language: "en",
+        region: "AU"
       });
 
       console.log("API Request URL:", `https://api.app.outscraper.com/maps/search-v3?${params}`);
@@ -70,6 +79,8 @@ const Wrapper = () => {
         query: `${query}, ${location}`,
         limit: "1",
         async: "false",
+        language: "en",
+        region: "AU"
       });
 
       const response = await fetch(`https://api.app.outscraper.com/maps/search-v3?${params}`, {
