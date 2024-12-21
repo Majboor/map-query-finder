@@ -74,9 +74,9 @@ const Index = () => {
       <AppSidebar onSearch={handleSearch} isLoading={isLoading} />
       
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="fixed inset-x-0 top-1/2 -translate-y-1/2 mx-auto max-w-3xl max-h-[80vh] overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-200">
+        <DialogContent className="fixed inset-x-4 sm:inset-x-8 md:inset-x-auto md:mx-auto top-1/2 -translate-y-1/2 w-[calc(100%-2rem)] sm:w-[calc(100%-4rem)] md:w-full md:max-w-3xl max-h-[80vh] md:max-h-[85vh] overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-200 p-4 sm:p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Search Results</h2>
+            <h2 className="text-lg sm:text-xl font-semibold">Search Results</h2>
             <Button 
               variant="ghost" 
               size="icon" 
@@ -89,7 +89,7 @@ const Index = () => {
           
           {isLoading && (
             <div className="flex justify-center py-8">
-              <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+              <Loader2 className="h-8 w-4 animate-spin text-gray-500" />
             </div>
           )}
 
@@ -100,7 +100,7 @@ const Index = () => {
           )}
 
           {!isLoading && places.length > 0 && (
-            <div className="space-y-6">
+            <div className="space-y-4 sm:space-y-6">
               {places.map((place, index) => (
                 <div key={index} className="flex flex-col gap-2">
                   <PlaceCard
@@ -111,7 +111,7 @@ const Index = () => {
                 </div>
               ))}
               
-              <div className="flex justify-center">
+              <div className="flex justify-center pt-2">
                 <Button
                   onClick={handleLoadMore}
                   disabled={isLoading}
