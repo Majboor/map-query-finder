@@ -5,12 +5,40 @@ import type { Place } from "@/services/placesApi";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface PlaceCardProps {
   place: Place;
   onSelect?: (place: Place) => void;
   isSelected?: boolean;
 }
+
+const processPopularTimes = (popularTimes: any[]) => {
+  const workingHours: Record<string, string> = {};
+  try {
+    for (const dayInfo of popularTimes) {
+      const dayText = dayInfo.day_text?.toLowerCase();
+      if (dayText) {
+        const hours = dayInfo.popular_times || [];
+        if (hours.length > 0) {
+          const openTimes = hours
+            .filter((h: any) => h.percentage > 0)
+            .map((h: any) => h.time);
+          if (openTimes.length > 0) {
+            workingHours[dayText] = `${openTimes[0]}-${openTimes[openTimes.length - 1]}`;
+          } else {
+            workingHours[dayText] = 'Closed';
+          }
+        } else {
+          workingHours[dayText] = 'Closed';
+        }
+      }
+    }
+  } catch (error) {
+    console.error("Error processing popular times:", error);
+  }
+  return workingHours;
+};
 
 const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -19,18 +47,58 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
     queryKey: ['placeDetails', place.name],
     queryFn: async () => {
       console.log('Fetching details for:', place.name);
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/maps/search-v3?query=${encodeURIComponent(place.name)}&limit=1&async=false&fields=business_status,price_level,business_hours,reviews`, {
-        headers: {
-          'X-API-KEY': import.meta.env.VITE_API_KEY,
-        },
-      });
-      if (!response.ok) {
-        console.error('API Error:', response.status);
-        throw new Error('Failed to fetch details');
+      try {
+        const response = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL}/maps/search-v3?` + 
+          new URLSearchParams({
+            query: place.name,
+            limit: '1',
+            language: 'en',
+            region: 'US',
+            async: 'false',
+            dropDuplicates: 'true',
+            fields: 'business_status,price_level,business_hours,reviews,popular_times'
+          }), {
+            headers: {
+              'X-API-KEY': import.meta.env.VITE_API_KEY,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            toast.error("Unauthorized. Check your API key.");
+            throw new Error('Unauthorized');
+          } else if (response.status === 402) {
+            toast.error("Payment required. Check your account billing.");
+            throw new Error('Payment required');
+          } else if (response.status === 422) {
+            toast.error("Invalid request parameters.");
+            throw new Error('Invalid parameters');
+          } else {
+            toast.error(`API Error: ${response.status}`);
+            throw new Error('Failed to fetch details');
+          }
+        }
+
+        const data = await response.json();
+        console.log('API Response:', data);
+
+        if (data.status === 'Success' && Array.isArray(data.data)) {
+          const placeData = data.data[0]?.[0];
+          if (placeData) {
+            // Process popular times to get working hours
+            if (Array.isArray(placeData.popular_times)) {
+              placeData.working_hours = processPopularTimes(placeData.popular_times);
+            }
+            return placeData;
+          }
+        }
+        return null;
+      } catch (error) {
+        console.error('Error fetching place details:', error);
+        throw error;
       }
-      const data = await response.json();
-      console.log('API Response:', data);
-      return data;
     },
     enabled: isExpanded,
     retry: 1,
@@ -100,42 +168,37 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
                 </div>
               ) : details ? (
                 <>
-                  <div className="bg-gray-100 p-4 rounded-md overflow-x-auto">
-                    <pre className="text-xs whitespace-pre-wrap">
-                      {JSON.stringify(details, null, 2)}
-                    </pre>
-                  </div>
-                  
-                  {/* Keep existing detailed view code */}
-                  {details.data?.[0]?.[0]?.business_status && (
+                  {details.business_status && (
                     <p className="text-sm">
                       <Info className="inline-block h-4 w-4 mr-2" />
-                      Status: {details.data[0][0].business_status}
+                      Status: {details.business_status}
                     </p>
                   )}
-                  {details.data?.[0]?.[0]?.price_level && (
+                  {details.price_level && (
                     <p className="text-sm">
                       <DollarSign className="inline-block h-4 w-4 mr-2" />
-                      Price Level: {'$'.repeat(details.data[0][0].price_level)}
+                      Price Level: {'$'.repeat(details.price_level)}
                     </p>
                   )}
-                  {details.data?.[0]?.[0]?.business_hours && (
+                  {details.working_hours && Object.keys(details.working_hours).length > 0 && (
                     <div className="text-sm">
                       <Clock className="inline-block h-4 w-4 mr-2" />
                       <span className="font-medium">Opening Hours:</span>
                       <ul className="ml-6 mt-1">
-                        {details.data[0][0].business_hours.map((hour: string, index: number) => (
-                          <li key={index}>{hour}</li>
+                        {Object.entries(details.working_hours).map(([day, hours], index) => (
+                          <li key={index} className="capitalize">
+                            {day}: {hours}
+                          </li>
                         ))}
                       </ul>
                     </div>
                   )}
-                  {details.data?.[0]?.[0]?.reviews && Array.isArray(details.data[0][0].reviews) && details.data[0][0].reviews.length > 0 && (
+                  {details.reviews && Array.isArray(details.reviews) && details.reviews.length > 0 && (
                     <div className="text-sm mt-4">
                       <Users className="inline-block h-4 w-4 mr-2" />
                       <span className="font-medium">Recent Reviews:</span>
                       <div className="ml-6 mt-2 space-y-3">
-                        {details.data[0][0].reviews.slice(0, 3).map((review: any, index: number) => (
+                        {details.reviews.slice(0, 3).map((review: any, index: number) => (
                           <div key={index} className="border-l-2 border-gray-200 pl-3">
                             <div className="flex items-center gap-1">
                               <Star className="h-4 w-4 text-yellow-500" fill="currentColor" />
