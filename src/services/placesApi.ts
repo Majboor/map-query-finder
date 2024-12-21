@@ -1,8 +1,8 @@
 import { toast } from "sonner";
 import type { Place, PlaceDetails } from "@/types/place";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "https://api.app.outscraper.com/maps/search-v3";
-const API_KEY = import.meta.env.VITE_API_KEY;
+const API_BASE_URL = "https://api.app.outscraper.com/maps/search-v3";
+const API_KEY = "YjE5YzI1NzQ0MTRjNGQwOWJmYzU3YzZmNmU5NDZiNTZ8N2Y5YWRkMjA2Ng";
 
 export interface SearchParams {
   query: string;
