@@ -30,8 +30,6 @@ export interface PlaceData {
     rating: number;
     text: string;
   }>;
-}
-
-export interface WorkingHours {
-  [key: string]: string;
+  rating?: number;
+  reviews_count?: number;
 }
