@@ -20,12 +20,14 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
 
   useEffect(() => {
     const checkImage = async (url: string) => {
+      if (!url || url === 'N/A') return false;
+      
       try {
         const response = await fetch(url);
         if (response.ok && response.status !== 404) {
-          return true;
+          const contentType = response.headers.get('content-type');
+          return contentType?.startsWith('image/');
         }
-        console.log(`Image validation failed for ${url}: ${response.status}`);
         return false;
       } catch (error) {
         console.error("Error checking image:", error);
@@ -37,7 +39,7 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
       setValidImage(null);
       setValidImages([]);
       
-      const images = place["Brand Images"]?.filter(img => img !== 'N/A') || [];
+      const images = place["Brand Images"]?.filter(img => img && img !== 'N/A') || [];
       const validatedImages = [];
       
       for (const image of images) {
@@ -47,10 +49,8 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
         }
       }
       
-      // Set the first valid image as the avatar image
       if (validatedImages.length > 0) {
         setValidImage(validatedImages[0]);
-        // Remove the first image from the array for PlaceDetails
         setValidImages(validatedImages.slice(1));
       }
     };
@@ -70,7 +70,6 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
     }
   };
 
-  // Create a new place object with filtered Brand Images
   const filteredPlace = {
     ...place,
     "Brand Images": validImages

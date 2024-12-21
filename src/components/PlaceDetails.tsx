@@ -17,11 +17,14 @@ const PlaceDetails = ({ place }: PlaceDetailsProps) => {
     const checkImages = async () => {
       const validImgs = [];
       for (const image of place["Brand Images"]) {
-        if (image === 'N/A') continue;
+        if (!image || image === 'N/A') continue;
         try {
           const response = await fetch(image);
-          if (response.ok) {
-            validImgs.push(image);
+          if (response.ok && response.status !== 404) {
+            const contentType = response.headers.get('content-type');
+            if (contentType?.startsWith('image/')) {
+              validImgs.push(image);
+            }
           }
         } catch (error) {
           console.error("Error checking image:", error);
