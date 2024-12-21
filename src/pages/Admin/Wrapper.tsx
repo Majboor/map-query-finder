@@ -24,8 +24,11 @@ const Wrapper = () => {
     setResponse(null);
 
     try {
+      // Combine query and location into a single search string
+      const searchQuery = `${query} ${location}`.trim();
+      
       const params = new URLSearchParams({
-        query: `${query}, ${location}`,
+        query: searchQuery,
         limit: limit,
         async: "false",
         language: "en",
@@ -35,7 +38,7 @@ const Wrapper = () => {
 
       console.log("API Request URL:", `https://api.app.outscraper.com/maps/search-v3?${params}`);
       console.log("Query Parameters:", {
-        query: `${query}, ${location}`,
+        query: searchQuery,
         limit: limit,
         async: "false",
         language: "en",
