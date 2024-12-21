@@ -21,10 +21,13 @@ export interface Place {
 
 export const searchPlaces = async ({ query, location, limit = 1, skipPlaces = 0 }: SearchParams) => {
   try {
+    // Ensure skipPlaces is a multiple of 20
+    const adjustedSkipPlaces = Math.floor(skipPlaces / 20) * 20;
+
     const params = new URLSearchParams({
       query: `${query}, ${location}`,
       limit: limit.toString(),
-      skipPlaces: skipPlaces.toString(),
+      skipPlaces: adjustedSkipPlaces.toString(),
       async: "false",
     });
 
