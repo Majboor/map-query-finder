@@ -16,12 +16,14 @@ const Wrapper = () => {
   const [limit, setLimit] = useState("1");
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<any>(null);
+  const [rawResponse, setRawResponse] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleTest = async () => {
     setIsLoading(true);
     setError(null);
     setResponse(null);
+    setRawResponse(null);
 
     try {
       const params = new URLSearchParams({
@@ -47,6 +49,7 @@ const Wrapper = () => {
         case 200:
           const data = await response.json();
           console.log("Original API Response:", data);
+          setRawResponse(data);
           
           if (data.status === "Success" && data.data) {
             const reformattedData = reformatResponse(data);
@@ -167,9 +170,18 @@ const Wrapper = () => {
             </div>
           )}
 
+          {rawResponse && (
+            <div className="mt-4 space-y-2">
+              <p className="font-medium">Raw API Response:</p>
+              <pre className="p-4 bg-gray-50 rounded-md overflow-auto max-h-96">
+                {JSON.stringify(rawResponse, null, 2)}
+              </pre>
+            </div>
+          )}
+
           {response && (
             <div className="mt-4 space-y-2">
-              <p className="font-medium">API Response:</p>
+              <p className="font-medium">Processed Response:</p>
               <pre className="p-4 bg-gray-50 rounded-md overflow-auto max-h-96">
                 {JSON.stringify(response, null, 2)}
               </pre>
