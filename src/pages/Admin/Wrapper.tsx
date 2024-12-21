@@ -13,6 +13,7 @@ const Wrapper = () => {
   const [apiKey, setApiKey] = useState(DEFAULT_API_KEY);
   const [query, setQuery] = useState("");
   const [location, setLocation] = useState("");
+  const [limit, setLimit] = useState("1");
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +26,7 @@ const Wrapper = () => {
     try {
       const params = new URLSearchParams({
         query: `${query}, ${location}`,
-        limit: "1",
+        limit: limit,
         async: "false",
         language: "en",
         region: "AU",
@@ -35,7 +36,7 @@ const Wrapper = () => {
       console.log("API Request URL:", `https://api.app.outscraper.com/maps/search-v3?${params}`);
       console.log("Query Parameters:", {
         query: `${query}, ${location}`,
-        limit: "1",
+        limit: limit,
         async: "false",
         language: "en",
         region: "AU",
@@ -103,6 +104,20 @@ const Wrapper = () => {
               onChange={(e) => setLocation(e.target.value)}
               placeholder="Enter location..."
             />
+          </div>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Result Limit</label>
+            <Input
+              type="number"
+              min="1"
+              max="20"
+              value={limit}
+              onChange={(e) => setLimit(e.target.value)}
+              placeholder="Enter number of results..."
+            />
+            <p className="text-sm text-muted-foreground">
+              Maximum 20 results per request
+            </p>
           </div>
           <Button 
             onClick={handleTest} 
