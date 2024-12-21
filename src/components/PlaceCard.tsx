@@ -23,16 +23,30 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
         const response = await fetch(url);
         if (response.ok) {
           setValidImage(url);
+        } else {
+          console.log(`Image validation failed for ${url}: ${response.status}`);
+          setValidImage(null);
         }
       } catch (error) {
         console.error("Error checking image:", error);
+        setValidImage(null);
       }
     };
 
-    if (place["Brand Images"]?.[0] && place["Brand Images"][0] !== 'N/A') {
-      checkImage(place["Brand Images"][0]);
-    }
+    const validateFirstImage = async () => {
+      if (place["Brand Images"]?.[0] && place["Brand Images"][0] !== 'N/A') {
+        await checkImage(place["Brand Images"][0]);
+      }
+    };
+
+    validateFirstImage();
   }, [place]);
+
+  // Filter out the validImage from Brand Images before passing to PlaceDetails
+  const filteredPlace = {
+    ...place,
+    "Brand Images": place["Brand Images"].filter(img => img !== validImage && img !== 'N/A')
+  };
 
   return (
     <Card className="w-full">
@@ -43,7 +57,7 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
               {validImage ? (
                 <AvatarImage src={validImage} alt={place["Business Name"]} />
               ) : (
-                <AvatarFallback>{place["Business Name"].charAt(0)}</AvatarFallback>
+                <AvatarFallback>{place["Business Name"].charAt(0).toUpperCase()}</AvatarFallback>
               )}
             </Avatar>
             <span>{place["Business Name"]}</span>
@@ -92,7 +106,7 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
 
           {isExpanded && (
             <div className="space-y-2 mt-4">
-              <PlaceDetailsComponent place={{...place, "Brand Images": place["Brand Images"].filter(img => img !== validImage)}} />
+              <PlaceDetailsComponent place={filteredPlace} />
             </div>
           )}
         </div>
