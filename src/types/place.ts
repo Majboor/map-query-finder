@@ -33,3 +33,25 @@ export interface PlaceData {
   rating?: number;
   reviews_count?: number;
 }
+
+export interface PopularTime {
+  hour: number;
+  percentage: number;
+  title: string;
+  time: string;
+}
+
+export interface PopularTimesDay {
+  day: number;
+  day_text: string;
+  popular_times: PopularTime[];
+}
+
+export interface Place {
+  name: string;
+  rating?: number;
+  address?: string;
+  phone?: string;
+  website?: string;
+  reviews_count?: number;
+}

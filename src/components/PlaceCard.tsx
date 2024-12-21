@@ -1,13 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin, Phone, Globe, ChevronDown, CheckSquare, Square } from "lucide-react";
-import type { Place } from "@/services/placesApi";
+import type { Place } from "@/types/place";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import type { PlaceDetails } from "@/types/place";
-import PlaceDetails from "./PlaceDetails";
+import PlaceDetailsComponent from "./PlaceDetails";
 
 interface PlaceCardProps {
   place: Place;
@@ -134,7 +134,7 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
                   <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
               ) : placeData ? (
-                <PlaceDetails placeData={placeData} />
+                <PlaceDetailsComponent placeData={placeData} />
               ) : null}
             </div>
           )}
