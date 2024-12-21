@@ -40,21 +40,16 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
     return () => window.removeEventListener('resize', updateBounds);
   }, []);
 
-  const handleMouseEnter = () => {
-    setIsExpanded(true);
-  };
-
-  const handleMouseLeave = () => {
-    if (!showSearch) {
-      setIsExpanded(false);
-    }
+  const toggleSidebar = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsExpanded(!isExpanded);
   };
 
   const toggleSearch = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setShowSearch(!showSearch);
-    setIsExpanded(true);
   };
 
   const handleSearch = async (query: string, location: string) => {
@@ -78,94 +73,70 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
     }
   };
 
-  const handleSidebarClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsExpanded(true);
-  };
-
-  const handleButtonClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsExpanded(true);
-  };
-
   return (
     <Draggable 
       bounds={{ left: bounds.left, right: bounds.right }}
       axis="x"
       position={position}
       onDrag={(e, data) => setPosition({ x: data.x, y: 0 })}
+      handle=".drag-handle"
     >
       <div 
         className={cn(
-          "fixed top-0 z-50 h-screen transition-all duration-300 ease-in-out cursor-move",
+          "fixed top-0 z-50 h-screen transition-all duration-300 ease-in-out",
           isExpanded ? "w-64" : "w-16",
           "bg-white rounded-l-lg shadow-lg"
         )}
         style={{ 
           right: `${-position.x}px`,
         }}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onClick={handleSidebarClick}
       >
-        <div className="p-2">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                className={cn(
-                  "w-full flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-all duration-300",
-                  isExpanded ? "justify-start" : "justify-start px-4"
-                )}
-                onClick={handleButtonClick}
-              >
-                <Grid className="w-6 h-6 text-blue-500" />
-                <span className={cn(
-                  "text-sm font-medium transition-opacity duration-300",
-                  isExpanded ? "opacity-100" : "opacity-0"
-                )}>AI</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                onClick={toggleSearch}
-                className={cn(
-                  "w-full flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-all duration-300",
-                  isExpanded ? "justify-start" : "justify-start px-4"
-                )}
-              >
-                <Search className="w-6 h-6" />
-                <span className={cn(
-                  "text-sm font-medium transition-opacity duration-300",
-                  isExpanded ? "opacity-100" : "opacity-0"
-                )}>Look for listings</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                className={cn(
-                  "w-full flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-all duration-300",
-                  isExpanded ? "justify-start" : "justify-start px-4"
-                )}
-                onClick={handleButtonClick}
-              >
-                <MessageSquare className="w-6 h-6" />
-                <span className={cn(
-                  "text-sm font-medium transition-opacity duration-300",
-                  isExpanded ? "opacity-100" : "opacity-0"
-                )}>Chat</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
+        <div 
+          className="drag-handle cursor-move p-2"
+          onClick={toggleSidebar}
+        >
+          <div className={cn(
+            "w-full flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-all duration-300",
+            isExpanded ? "justify-start" : "justify-center"
+          )}>
+            <Grid className="w-6 h-6 text-blue-500" />
+            {isExpanded && (
+              <span className="text-sm font-medium">AI</span>
+            )}
+          </div>
         </div>
 
-        {showSearch && (
-          <div className="p-4 border-t" onClick={handleSidebarClick}>
-            <SearchForm onSearch={handleSearch} isLoading={isLoading} />
-          </div>
+        {isExpanded && (
+          <>
+            <div className="p-2">
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    className="w-full flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-all duration-300"
+                    onClick={toggleSearch}
+                  >
+                    <Search className="w-6 h-6" />
+                    <span className="text-sm font-medium">Look for listings</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    className="w-full flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-all duration-300"
+                  >
+                    <MessageSquare className="w-6 h-6" />
+                    <span className="text-sm font-medium">Chat</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </div>
+
+            {showSearch && (
+              <div className="p-4 border-t">
+                <SearchForm onSearch={handleSearch} isLoading={isLoading} />
+              </div>
+            )}
+          </>
         )}
       </div>
     </Draggable>
