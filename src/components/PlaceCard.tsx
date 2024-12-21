@@ -1,8 +1,10 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Star, MapPin, Phone, Globe, ChevronDown, CheckSquare, Square } from "lucide-react";
+import { Star, MapPin, Phone, Globe, ChevronDown, CheckSquare, Square, Clock, Info, DollarSign, Users } from "lucide-react";
 import type { Place } from "@/services/placesApi";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 
 interface PlaceCardProps {
   place: Place;
@@ -12,6 +14,22 @@ interface PlaceCardProps {
 
 const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+
+  const { data: details, isLoading: isLoadingDetails } = useQuery({
+    queryKey: ['placeDetails', place.name],
+    queryFn: async () => {
+      // This query will only run when isExpanded is true
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/maps/reviews-v3?query=${encodeURIComponent(place.name)}&async=false`, {
+        headers: {
+          'X-API-KEY': import.meta.env.VITE_API_KEY,
+        },
+      });
+      if (!response.ok) throw new Error('Failed to fetch details');
+      const data = await response.json();
+      return data.data[0];
+    },
+    enabled: isExpanded, // Only fetch when expanded
+  });
 
   return (
     <Card className="w-full">
@@ -67,6 +85,61 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
               <Globe className="inline-block h-4 w-4 mr-2" />
               Visit Website
             </a>
+          )}
+
+          {isExpanded && (
+            <div className="space-y-2 mt-4">
+              {isLoadingDetails ? (
+                <div className="flex justify-center py-4">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                </div>
+              ) : (
+                details && (
+                  <>
+                    {details.business_status && (
+                      <p className="text-sm">
+                        <Info className="inline-block h-4 w-4 mr-2" />
+                        Status: {details.business_status}
+                      </p>
+                    )}
+                    {details.price_level && (
+                      <p className="text-sm">
+                        <DollarSign className="inline-block h-4 w-4 mr-2" />
+                        Price Level: {'$'.repeat(details.price_level)}
+                      </p>
+                    )}
+                    {details.opening_hours && (
+                      <div className="text-sm">
+                        <Clock className="inline-block h-4 w-4 mr-2" />
+                        <span className="font-medium">Opening Hours:</span>
+                        <ul className="ml-6 mt-1">
+                          {details.opening_hours.map((hour: string, index: number) => (
+                            <li key={index}>{hour}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    {details.reviews && (
+                      <div className="text-sm mt-4">
+                        <Users className="inline-block h-4 w-4 mr-2" />
+                        <span className="font-medium">Recent Reviews:</span>
+                        <div className="ml-6 mt-2 space-y-3">
+                          {details.reviews.slice(0, 3).map((review: any, index: number) => (
+                            <div key={index} className="border-l-2 border-gray-200 pl-3">
+                              <div className="flex items-center gap-1">
+                                <Star className="h-4 w-4 text-yellow-500" fill="currentColor" />
+                                <span>{review.rating}</span>
+                              </div>
+                              <p className="text-gray-600 mt-1">{review.text}</p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )
+              )}
+            </div>
           )}
         </div>
         <Button
