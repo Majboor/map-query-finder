@@ -1,4 +1,5 @@
 import { Clock, Info, Users } from "lucide-react";
+import { useState, useEffect } from "react";
 import type { Place } from "@/types/place";
 import BusinessHours from "./BusinessHours";
 
@@ -7,9 +8,32 @@ interface PlaceDetailsProps {
 }
 
 const PlaceDetails = ({ place }: PlaceDetailsProps) => {
+  const [validImages, setValidImages] = useState<string[]>([]);
   const workingHours = place.Hours 
     ? Object.entries(place.Hours).map(([day, hours]) => `${day}: ${hours}`) 
     : [];
+
+  useEffect(() => {
+    const checkImages = async () => {
+      const validImgs = [];
+      for (const image of place["Brand Images"]) {
+        if (image === 'N/A') continue;
+        try {
+          const response = await fetch(image);
+          if (response.ok) {
+            validImgs.push(image);
+          }
+        } catch (error) {
+          console.error("Error checking image:", error);
+        }
+      }
+      setValidImages(validImgs);
+    };
+
+    if (place["Brand Images"]?.length) {
+      checkImages();
+    }
+  }, [place]);
 
   return (
     <div className="space-y-2">
@@ -26,17 +50,15 @@ const PlaceDetails = ({ place }: PlaceDetailsProps) => {
           <BusinessHours hours={workingHours} />
         </div>
       )}
-      {place["Brand Images"] && place["Brand Images"].length > 0 && (
+      {validImages.length > 0 && (
         <div className="grid grid-cols-2 gap-2 mt-4">
-          {place["Brand Images"].map((image, index) => (
-            image !== 'N/A' && (
-              <img
-                key={index}
-                src={image}
-                alt={`${place["Business Name"]} image ${index + 1}`}
-                className="w-full h-32 object-cover rounded-md"
-              />
-            )
+          {validImages.map((image, index) => (
+            <img
+              key={index}
+              src={image}
+              alt={`${place["Business Name"]} image ${index + 1}`}
+              className="w-full h-32 object-cover rounded-md"
+            />
           ))}
         </div>
       )}

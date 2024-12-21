@@ -2,9 +2,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Star, MapPin, Phone, Globe, ChevronDown, CheckSquare, Square } from "lucide-react";
 import type { Place } from "@/types/place";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import PlaceDetailsComponent from "./PlaceDetails";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 interface PlaceCardProps {
   place: Place;
@@ -14,12 +15,39 @@ interface PlaceCardProps {
 
 const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [validImage, setValidImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkImage = async (url: string) => {
+      try {
+        const response = await fetch(url);
+        if (response.ok) {
+          setValidImage(url);
+        }
+      } catch (error) {
+        console.error("Error checking image:", error);
+      }
+    };
+
+    if (place["Brand Images"]?.[0] && place["Brand Images"][0] !== 'N/A') {
+      checkImage(place["Brand Images"][0]);
+    }
+  }, [place]);
 
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex justify-between items-start">
-          <span>{place["Business Name"]}</span>
+          <div className="flex items-center gap-2">
+            <Avatar className="h-8 w-8">
+              {validImage ? (
+                <AvatarImage src={validImage} alt={place["Business Name"]} />
+              ) : (
+                <AvatarFallback>{place["Business Name"].charAt(0)}</AvatarFallback>
+              )}
+            </Avatar>
+            <span>{place["Business Name"]}</span>
+          </div>
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
@@ -64,7 +92,7 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
 
           {isExpanded && (
             <div className="space-y-2 mt-4">
-              <PlaceDetailsComponent place={place} />
+              <PlaceDetailsComponent place={{...place, "Brand Images": place["Brand Images"].filter(img => img !== validImage)}} />
             </div>
           )}
         </div>

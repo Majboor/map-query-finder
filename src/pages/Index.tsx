@@ -3,8 +3,9 @@ import { AppSidebar } from "@/components/AppSidebar";
 import PlaceCard from "@/components/PlaceCard";
 import { Button } from "@/components/ui/button";
 import { searchPlaces, type Place } from "@/services/placesApi";
-import { Loader2 } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import { SidebarProvider } from "@/components/ui/sidebar";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 const Index = () => {
   const [places, setPlaces] = useState<Place[]>([]);
@@ -12,6 +13,7 @@ const Index = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [currentBrand, setCurrentBrand] = useState("");
   const [currentLocation, setCurrentLocation] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleSearch = async (brand: string, location: string) => {
     setIsLoading(true);
@@ -20,6 +22,7 @@ const Index = () => {
     try {
       const results = await searchPlaces({ brand, location });
       setPlaces(results);
+      setIsOpen(true);
     } catch (error) {
       console.error("Search error:", error);
     } finally {
@@ -60,43 +63,52 @@ const Index = () => {
       <div className="flex min-h-screen w-full bg-gray-50 relative">
         <AppSidebar onSearch={handleSearch} isLoading={isLoading} />
         
-        <main className="flex-1 p-8">
-          {isLoading && places.length === 0 && (
-            <div className="flex justify-center">
-              <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">Search Results</h2>
+              <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+                <X className="h-4 w-4" />
+              </Button>
             </div>
-          )}
-
-          {places.length > 0 && (
-            <div className="space-y-6 max-w-3xl mx-auto">
-              {places.map((place, index) => (
-                <PlaceCard
-                  key={index}
-                  place={place}
-                  onSelect={handleSelect}
-                  isSelected={selectedPlaces.has(place["Business Name"])}
-                />
-              ))}
-              
+            
+            {isLoading && places.length === 0 && (
               <div className="flex justify-center">
-                <Button
-                  onClick={handleLoadMore}
-                  disabled={isLoading}
-                  variant="outline"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Loading...
-                    </>
-                  ) : (
-                    "Load More"
-                  )}
-                </Button>
+                <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
               </div>
-            </div>
-          )}
-        </main>
+            )}
+
+            {places.length > 0 && (
+              <div className="space-y-6">
+                {places.map((place, index) => (
+                  <PlaceCard
+                    key={index}
+                    place={place}
+                    onSelect={handleSelect}
+                    isSelected={selectedPlaces.has(place["Business Name"])}
+                  />
+                ))}
+                
+                <div className="flex justify-center">
+                  <Button
+                    onClick={handleLoadMore}
+                    disabled={isLoading}
+                    variant="outline"
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Loading...
+                      </>
+                    ) : (
+                      "Load More"
+                    )}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </SidebarProvider>
   );
