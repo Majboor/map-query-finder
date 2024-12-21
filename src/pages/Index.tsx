@@ -64,8 +64,8 @@ const Index = () => {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-gray-50 relative">
-        <div className="fixed right-0 top-0 h-full">
+      <div className="min-h-screen w-full bg-gray-50">
+        <div className="fixed right-0 top-0 bottom-0 z-50">
           <AppSidebar onSearch={handleSearch} isLoading={isLoading} />
         </div>
         
