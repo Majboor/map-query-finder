@@ -57,7 +57,7 @@ const Wrapper = () => {
         "Business Address": place.full_address || "N/A",
         "Business Phone": place.phone || "N/A",
         "Business Email": place.details?.["Business Email"] || "N/A",
-        "Business Description": place.description || "N/A",
+        "Business Description": place.description || place.about?.description || place.about?.["From the business"]?.description || "N/A",
         "Website URL": place.site || "N/A",
         "Latitude": place.latitude || 0,
         "Longitude": place.longitude || 0,
