@@ -24,6 +24,7 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [bounds, setBounds] = useState({ right: 0, left: 0 });
+  const [position, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const updateBounds = () => {
@@ -79,14 +80,19 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
     <Draggable 
       bounds={{ left: bounds.left, right: bounds.right }}
       axis="x"
+      position={position}
+      onDrag={(e, data) => setPosition({ x: data.x, y: 0 })}
     >
       <div 
         className={cn(
-          "fixed top-0 z-50 transition-all duration-300 ease-in-out cursor-move",
+          "fixed top-0 z-50 transition-transform duration-300 ease-in-out cursor-move",
           isExpanded ? "w-64" : "w-16",
           "bg-white rounded-l-lg shadow-lg"
         )}
-        style={{ right: 0 }}
+        style={{ 
+          right: 0,
+          transform: `translateX(${position.x}px)`
+        }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
