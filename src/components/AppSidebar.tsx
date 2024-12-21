@@ -62,14 +62,14 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
 
   return (
     <Draggable 
-      bounds={{ left: window.innerWidth - 300, right: window.innerWidth - 64 }}
+      bounds={{ left: 0, right: 236 }}
       axis="x"
     >
       <div 
         className={cn(
-          "fixed right-0 z-50 transition-all duration-300 ease-in-out cursor-move",
+          "fixed right-0 top-0 z-50 transition-all duration-300 ease-in-out cursor-move",
           isExpanded ? "w-64" : "w-16",
-          "bg-white rounded-lg shadow-lg"
+          "bg-white rounded-l-lg shadow-lg"
         )}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
