@@ -87,7 +87,7 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
     >
       <div 
         className={cn(
-          "fixed top-0 z-50 transition-all duration-300 ease-in-out cursor-move",
+          "fixed top-0 z-50 h-screen transition-all duration-300 ease-in-out cursor-move",
           isExpanded ? "w-64" : "w-16",
           "bg-white rounded-l-lg shadow-lg"
         )}
@@ -108,7 +108,10 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
                 )}
               >
                 <Grid className="w-6 h-6 text-blue-500" />
-                <span className={cn("text-sm font-medium transition-opacity duration-300", !isExpanded && "opacity-0")}>AI</span>
+                <span className={cn(
+                  "text-sm font-medium transition-opacity duration-300",
+                  isExpanded ? "opacity-100" : "opacity-0"
+                )}>AI</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
 
@@ -121,7 +124,10 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
                 )}
               >
                 <Search className="w-6 h-6" />
-                <span className={cn("text-sm font-medium transition-opacity duration-300", !isExpanded && "opacity-0")}>Look for listings</span>
+                <span className={cn(
+                  "text-sm font-medium transition-opacity duration-300",
+                  isExpanded ? "opacity-100" : "opacity-0"
+                )}>Look for listings</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
 
@@ -133,7 +139,10 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
                 )}
               >
                 <MessageSquare className="w-6 h-6" />
-                <span className={cn("text-sm font-medium transition-opacity duration-300", !isExpanded && "opacity-0")}>Chat</span>
+                <span className={cn(
+                  "text-sm font-medium transition-opacity duration-300",
+                  isExpanded ? "opacity-100" : "opacity-0"
+                )}>Chat</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
