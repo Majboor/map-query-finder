@@ -10,37 +10,46 @@ const Index = () => {
   const [places, setPlaces] = useState<Place[]>([]);
   const [selectedPlaces, setSelectedPlaces] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
-  const [currentQuery, setCurrentQuery] = useState("");
+  const [currentBrand, setCurrentBrand] = useState("");
   const [currentLocation, setCurrentLocation] = useState("");
 
-  const handleSearch = async (query: string, location: string) => {
+  const handleSearch = async (brand: string, location: string) => {
     setIsLoading(true);
-    setCurrentQuery(query);
+    setCurrentBrand(brand);
     setCurrentLocation(location);
-    const results = await searchPlaces({ query, location });
-    setPlaces(results);
-    setIsLoading(false);
+    try {
+      const results = await searchPlaces({ brand, location });
+      setPlaces(results);
+    } catch (error) {
+      console.error("Search error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLoadMore = async () => {
     setIsLoading(true);
-    const newResults = await searchPlaces({
-      query: currentQuery,
-      location: currentLocation,
-      skipPlaces: places.length,
-      limit: 1,
-    });
-    setPlaces([...places, ...newResults]);
-    setIsLoading(false);
+    try {
+      const newResults = await searchPlaces({
+        brand: currentBrand,
+        location: currentLocation,
+        limit: places.length + 5,
+      });
+      setPlaces(newResults);
+    } catch (error) {
+      console.error("Load more error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSelect = (place: Place) => {
     setSelectedPlaces((prev) => {
       const newSet = new Set(prev);
-      if (newSet.has(place.name)) {
-        newSet.delete(place.name);
+      if (newSet.has(place["Business Name"])) {
+        newSet.delete(place["Business Name"]);
       } else {
-        newSet.add(place.name);
+        newSet.add(place["Business Name"]);
       }
       return newSet;
     });
@@ -65,7 +74,7 @@ const Index = () => {
                   key={index}
                   place={place}
                   onSelect={handleSelect}
-                  isSelected={selectedPlaces.has(place.name)}
+                  isSelected={selectedPlaces.has(place["Business Name"])}
                 />
               ))}
               

@@ -3,10 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Star, MapPin, Phone, Globe, ChevronDown, CheckSquare, Square } from "lucide-react";
 import type { Place } from "@/types/place";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
-import type { PlaceDetails } from "@/types/place";
 import PlaceDetailsComponent from "./PlaceDetails";
 
 interface PlaceCardProps {
@@ -18,74 +15,12 @@ interface PlaceCardProps {
 const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const { data: details, isLoading: isLoadingDetails } = useQuery({
-    queryKey: ['placeDetails', place.name],
-    queryFn: async () => {
-      console.log('Fetching details for:', place.name);
-      try {
-        const params = {
-          query: place.name,
-          limit: '10',
-          language: 'en',
-          region: 'AU',
-          async: 'false',
-          dropDuplicates: 'true'
-        };
-
-        const response = await fetch(
-          `${import.meta.env.VITE_API_BASE_URL}/maps/search-v3?${new URLSearchParams(params)}`,
-          {
-            headers: {
-              'X-API-KEY': import.meta.env.VITE_API_KEY,
-            },
-          }
-        );
-
-        if (!response.ok) {
-          if (response.status === 401) {
-            toast.error("Unauthorized. Check your API key.");
-            throw new Error('Unauthorized');
-          } else if (response.status === 402) {
-            toast.error("Payment required. Check your account billing.");
-            throw new Error('Payment required');
-          } else if (response.status === 422) {
-            toast.error("Invalid request parameters.");
-            throw new Error('Invalid parameters');
-          } else {
-            toast.error(`API Error: ${response.status}`);
-            throw new Error('Failed to fetch details');
-          }
-        }
-
-        const data = await response.json();
-        console.log('API Response:', data);
-        return data as PlaceDetails;
-      } catch (error) {
-        console.error('Error fetching place details:', error);
-        throw error;
-      }
-    },
-    enabled: isExpanded,
-    retry: 1,
-  });
-
-  const placeData = details?.data?.[0]?.[0];
-
   return (
     <Card className="w-full">
       <CardHeader>
         <CardTitle className="flex justify-between items-start">
-          <span>{place.name}</span>
+          <span>{place["Business Name"]}</span>
           <div className="flex items-center gap-2">
-            {place.rating && (
-              <span className="flex items-center text-sm bg-yellow-100 px-2 py-1 rounded">
-                <Star className="h-4 w-4 text-yellow-500 mr-1" fill="currentColor" />
-                {place.rating}
-                {place.reviews_count && (
-                  <span className="text-gray-500 ml-1">({place.reviews_count})</span>
-                )}
-              </span>
-            )}
             <Button
               variant="ghost"
               size="icon"
@@ -103,21 +38,21 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
       </CardHeader>
       <CardContent className="space-y-2">
         <div className={`space-y-2 ${!isExpanded ? "line-clamp-2" : ""}`}>
-          {place.address && (
+          {place["Business Address"] && (
             <p className="text-sm text-gray-500">
               <MapPin className="inline-block h-4 w-4 mr-2" />
-              {place.address}
+              {place["Business Address"]}
             </p>
           )}
-          {placeData?.phone && (
+          {place["Business Phone"] && (
             <p className="text-sm">
               <Phone className="inline-block h-4 w-4 mr-2" />
-              {placeData.phone}
+              {place["Business Phone"]}
             </p>
           )}
-          {placeData?.site && (
+          {place["Website URL"] && (
             <a
-              href={placeData.site}
+              href={place["Website URL"]}
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-blue-500 hover:underline block"
@@ -129,13 +64,7 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
 
           {isExpanded && (
             <div className="space-y-2 mt-4">
-              {isLoadingDetails ? (
-                <div className="flex justify-center py-4">
-                  <Loader2 className="h-6 w-6 animate-spin" />
-                </div>
-              ) : placeData ? (
-                <PlaceDetailsComponent placeData={placeData} />
-              ) : null}
+              <PlaceDetailsComponent place={place} />
             </div>
           )}
         </div>

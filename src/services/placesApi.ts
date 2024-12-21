@@ -1,61 +1,49 @@
 import { toast } from "sonner";
-import type { Place, PlaceDetails } from "@/types/place";
+import type { Place, PlaceApiResponse } from "@/types/place";
 
-const API_BASE_URL = "https://api.app.outscraper.com/maps/search-v3";
-const API_KEY = "YjE5YzI1NzQ0MTRjNGQwOWJmYzU3YzZmNmU5NDZiNTZ8N2Y5YWRkMjA2Ng";
+const API_BASE_URL = "http://45.90.122.221:5001";
 
 export interface SearchParams {
-  query: string;
+  brand: string;
   location: string;
   limit?: number;
-  skipPlaces?: number;
 }
 
-const mapApiResponseToPlace = (placeData: any): Place => {
+const mapApiResponseToPlace = (placeData: Place): Place => {
   return {
-    name: placeData.name,
-    rating: placeData.rating,
-    address: placeData.full_address,
-    phone: placeData.phone,
-    website: placeData.site,
-    reviews_count: placeData.reviews,
+    "Business Name": placeData["Business Name"],
+    "Business Address": placeData["Business Address"],
+    "Business Description": placeData["Business Description"],
+    "Business Email": placeData["Business Email"],
+    "Business Phone": placeData["Business Phone"],
+    "Website URL": placeData["Website URL"],
+    "Latitude": placeData["Latitude"],
+    "Longitude": placeData["Longitude"],
+    "Hours": placeData["Hours"],
+    "Brand Images": placeData["Brand Images"],
+    "Owner Name": placeData["Owner Name"],
+    "Verified": placeData["Verified"],
+    "Owner Link": placeData["Owner Link"]
   };
 };
 
-export { type Place };  // Export the Place type
+export { type Place };
 
-export const searchPlaces = async ({ query, location, limit = 1, skipPlaces = 0 }: SearchParams): Promise<Place[]> => {
+export const searchPlaces = async ({ brand, location, limit = 5 }: SearchParams): Promise<Place[]> => {
   try {
-    // Ensure skipPlaces is a multiple of 20
-    const adjustedSkipPlaces = Math.floor(skipPlaces / 20) * 20;
-
     const params = new URLSearchParams({
-      query: `${query}, ${location}`,
-      limit: limit.toString(),
-      skipPlaces: adjustedSkipPlaces.toString(),
-      async: "false",
-      language: "en",
-      region: "AU",
-      dropDuplicates: "true"
+      brand,
+      location,
+      limit: limit.toString()
     });
 
-    console.log("API Request URL:", `${API_BASE_URL}?${params}`);
+    console.log("API Request URL:", `${API_BASE_URL}/search?${params}`);
     console.log("Query Parameters:", Object.fromEntries(params));
 
-    const response = await fetch(`${API_BASE_URL}?${params}`, {
-      headers: {
-        "X-API-KEY": API_KEY,
-      },
-    });
+    const response = await fetch(`${API_BASE_URL}/search?${params}`);
 
     if (!response.ok) {
-      if (response.status === 401) {
-        toast.error("Unauthorized. Check your API key.");
-        throw new Error('Unauthorized');
-      } else if (response.status === 402) {
-        toast.error("Payment required. Check your account billing.");
-        throw new Error('Payment required');
-      } else if (response.status === 422) {
+      if (response.status === 400) {
         toast.error("Invalid request parameters.");
         throw new Error('Invalid parameters');
       } else {
@@ -64,11 +52,11 @@ export const searchPlaces = async ({ query, location, limit = 1, skipPlaces = 0 
       }
     }
 
-    const data: PlaceDetails = await response.json();
+    const data: PlaceApiResponse = await response.json();
     console.log("API Response:", data);
 
-    if (data.status === "Success" && Array.isArray(data.data) && data.data.length > 0 && Array.isArray(data.data[0])) {
-      return data.data[0].map(mapApiResponseToPlace);
+    if (data.results && Array.isArray(data.results)) {
+      return data.results.map(mapApiResponseToPlace);
     }
 
     return [];
