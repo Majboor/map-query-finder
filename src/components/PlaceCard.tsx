@@ -36,11 +36,23 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
     const validateFirstImage = async () => {
       if (place["Brand Images"]?.[0] && place["Brand Images"][0] !== 'N/A') {
         await checkImage(place["Brand Images"][0]);
+      } else {
+        setValidImage(null);
       }
     };
 
     validateFirstImage();
   }, [place]);
+
+  const handleSelect = () => {
+    if (onSelect) {
+      try {
+        onSelect(place);
+      } catch (error) {
+        console.error("Error in select handler:", error);
+      }
+    }
+  };
 
   // Filter out the validImage from Brand Images before passing to PlaceDetails
   const filteredPlace = {
@@ -66,7 +78,7 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => onSelect?.(place)}
+              onClick={handleSelect}
               className="h-8 w-8"
             >
               {isSelected ? (
