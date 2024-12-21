@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { Textarea } from "@/components/ui/textarea";
+import { reformatResponse } from "@/utils/responseMapper";
 
 const DEFAULT_API_KEY = "YjE5YzI1NzQ0MTRjNGQwOWJmYzU3YzZmNmU5NDZiNTZ8N2Y5YWRkMjA2Ng";
 
@@ -15,65 +16,6 @@ const Wrapper = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
-
-  const reformatResponse = (data: any) => {
-    if (!data || !Array.isArray(data.data) || data.data.length === 0) {
-      return { results: [] };
-    }
-
-    const place = data.data[0];
-    if (!place) return { results: [] };
-
-    // Process working hours from the API response
-    const workingHours = place.working_hours || {};
-    const defaultHours = {
-      "Monday": "Closed",
-      "Tuesday": "Closed",
-      "Wednesday": "Closed",
-      "Thursday": "Closed",
-      "Friday": "Closed",
-      "Saturday": "Closed",
-      "Sunday": "Closed"
-    };
-
-    // Extract working hours from popular_times if working_hours is not available
-    if (!place.working_hours && place.popular_times) {
-      place.popular_times.forEach((day: any) => {
-        const dayText = day.day_text;
-        const hours = day.popular_times;
-        if (hours && hours.length > 0) {
-          const openHours = hours.filter((h: any) => h.percentage > 0);
-          if (openHours.length > 0) {
-            workingHours[dayText] = `${openHours[0].time}-${openHours[openHours.length - 1].time}`;
-          }
-        }
-      });
-    }
-
-    // Map the API response to our expected format
-    return {
-      results: [{
-        "Business Name": place.name || "N/A",
-        "Business Address": place.full_address || "N/A",
-        "Business Phone": place.phone || "N/A",
-        "Business Email": place.details?.["Business Email"] || "N/A",
-        "Business Description": place.description || place.about?.description || place.about?.["From the business"]?.description || "N/A",
-        "Website URL": place.site || "N/A",
-        "Latitude": place.latitude || 0,
-        "Longitude": place.longitude || 0,
-        "Brand Images": [
-          place.logo || "N/A",
-          place.photo || "N/A"
-        ],
-        "Hours": { ...defaultHours, ...workingHours },
-        "Category": place.type || "N/A",
-        "Tagline": place.type || "N/A",
-        "Owner Name": place.owner_title || "N/A",
-        "Verified": place.verified || false,
-        "Owner Link": place.owner_link || "N/A"
-      }]
-    };
-  };
 
   const handleTest = async () => {
     setIsLoading(true);

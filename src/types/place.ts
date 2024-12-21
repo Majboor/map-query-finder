@@ -12,10 +12,16 @@ export interface Place {
   "Latitude": number;
   "Longitude": number;
   "Hours": Record<string, string>;
-  "Owner Name"?: string;
+  "Operating Hours": Record<string, string>;
+  "Open State": string;
+  "Category": string;
+  "Tagline": string;
+  "Owner Name": string;
+  "Products/Services": string[];
+  "Social Media Links": string[];
+  "Brand Images": string[];
   "Verified"?: boolean;
   "Owner Link"?: string;
-  "Brand Images": string[];
 }
 
 export interface PlaceData {
@@ -32,9 +38,27 @@ export interface PlaceData {
   price_level?: number;
   reviews?: Review[];
   brand_images?: string[];
+  popular_times?: PopularTime[];
+  about?: About;
 }
 
 export interface Review {
   rating: number;
   text: string;
+}
+
+export interface PopularTime {
+  day_text: string;
+  popular_times: Array<{
+    hour: number;
+    percentage: number;
+    time: string;
+  }>;
+}
+
+export interface About {
+  description?: string;
+  "From the business"?: {
+    description?: string;
+  };
 }
