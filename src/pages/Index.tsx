@@ -16,7 +16,7 @@ const Index = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSearch = async (brand: string, location: string) => {
-    if (isLoading) return; // Prevent multiple clicks while loading
+    if (isLoading) return;
     
     setIsLoading(true);
     setCurrentBrand(brand);
@@ -33,7 +33,7 @@ const Index = () => {
   };
 
   const handleLoadMore = async () => {
-    if (isLoading) return; // Prevent multiple clicks while loading
+    if (isLoading) return;
     
     setIsLoading(true);
     try {
@@ -67,12 +67,12 @@ const Index = () => {
 
   return (
     <div className="h-screen w-full bg-background">
-      <div className="fixed right-0 top-0 bottom-0 z-50 w-16">
+      <div className="fixed left-0 top-0 bottom-0 z-50 w-16">
         <AppSidebar onSearch={handleSearch} isLoading={isLoading} />
       </div>
       
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="fixed right-[5.5rem] top-1/2 -translate-y-1/2 max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="fixed left-[5.5rem] top-1/2 -translate-y-1/2 max-w-3xl max-h-[80vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Search Results</h2>
             <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
