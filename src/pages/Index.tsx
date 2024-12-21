@@ -16,6 +16,8 @@ const Index = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleSearch = async (brand: string, location: string) => {
+    if (isLoading) return; // Prevent multiple clicks while loading
+    
     setIsLoading(true);
     setCurrentBrand(brand);
     setCurrentLocation(location);
@@ -31,6 +33,8 @@ const Index = () => {
   };
 
   const handleLoadMore = async () => {
+    if (isLoading) return; // Prevent multiple clicks while loading
+    
     setIsLoading(true);
     try {
       const newResults = await searchPlaces({
@@ -68,7 +72,7 @@ const Index = () => {
       </div>
       
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="fixed right-20 top-1/2 -translate-y-1/2 max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="fixed right-[5.5rem] top-1/2 -translate-y-1/2 max-w-3xl max-h-[80vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Search Results</h2>
             <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
