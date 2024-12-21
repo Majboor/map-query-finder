@@ -1,14 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Star, MapPin, Phone, Globe, ChevronDown, CheckSquare, Square, Info, DollarSign, Users } from "lucide-react";
+import { Star, MapPin, Phone, Globe, ChevronDown, CheckSquare, Square, Info, DollarSign, Users, Clock } from "lucide-react";
 import type { Place } from "@/services/placesApi";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { processPopularTimes, buildApiParams } from "@/utils/placeUtils";
-import BusinessHours from "./BusinessHours";
-import type { PlaceDetails } from "@/types/place";
+import type { PlaceDetails, PlaceData } from "@/types/place";
 
 interface PlaceCardProps {
   place: Place;
@@ -24,7 +22,15 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
     queryFn: async () => {
       console.log('Fetching details for:', place.name);
       try {
-        const params = buildApiParams(place.name);
+        const params = {
+          query: place.name,
+          limit: '1',
+          language: 'en',
+          region: 'AU',
+          async: 'false',
+          dropDuplicates: 'true'
+        };
+
         const response = await fetch(
           `${import.meta.env.VITE_API_BASE_URL}/maps/search-v3?${new URLSearchParams(params)}`,
           {
@@ -52,11 +58,6 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
 
         const data = await response.json();
         console.log('API Response:', data);
-        
-        if (data.data?.[0]?.[0]?.popular_times) {
-          data.data[0][0].working_hours = processPopularTimes(data.data[0][0].popular_times);
-        }
-        
         return data;
       } catch (error) {
         console.error('Error fetching place details:', error);
@@ -67,7 +68,7 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
     retry: 1,
   });
 
-  const placeDetails = details?.data?.[0]?.[0];
+  const placeData: PlaceData | undefined = details?.data?.[0]?.[0];
 
   return (
     <Card className="w-full">
@@ -107,15 +108,15 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
               {place.address}
             </p>
           )}
-          {place.phone && (
+          {placeData?.phone && (
             <p className="text-sm">
               <Phone className="inline-block h-4 w-4 mr-2" />
-              {place.phone}
+              {placeData.phone}
             </p>
           )}
-          {place.website && (
+          {placeData?.site && (
             <a
-              href={place.website}
+              href={placeData.site}
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm text-blue-500 hover:underline block"
@@ -131,29 +132,39 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
                 <div className="flex justify-center py-4">
                   <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
-              ) : placeDetails ? (
+              ) : placeData ? (
                 <>
-                  {placeDetails.business_status && (
+                  {placeData.business_status && (
                     <p className="text-sm">
                       <Info className="inline-block h-4 w-4 mr-2" />
-                      Status: {placeDetails.business_status}
+                      Status: {placeData.business_status}
                     </p>
                   )}
-                  {placeDetails.price_level && (
+                  {placeData.price_level && (
                     <p className="text-sm">
                       <DollarSign className="inline-block h-4 w-4 mr-2" />
-                      Price Level: {'$'.repeat(placeDetails.price_level)}
+                      Price Level: {'$'.repeat(placeData.price_level)}
                     </p>
                   )}
-                  {placeDetails.business_hours && (
-                    <BusinessHours hours={placeDetails.business_hours} />
+                  {placeData.working_hours && Object.keys(placeData.working_hours).length > 0 && (
+                    <div className="text-sm">
+                      <Clock className="inline-block h-4 w-4 mr-2" />
+                      <span className="font-medium">Opening Hours:</span>
+                      <ul className="ml-6 mt-1">
+                        {Object.entries(placeData.working_hours).map(([day, hours]) => (
+                          <li key={day} className="capitalize">
+                            {day}: {hours}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   )}
-                  {placeDetails.reviews && Array.isArray(placeDetails.reviews) && placeDetails.reviews.length > 0 && (
+                  {placeData.reviews && placeData.reviews.length > 0 && (
                     <div className="text-sm mt-4">
                       <Users className="inline-block h-4 w-4 mr-2" />
                       <span className="font-medium">Recent Reviews:</span>
                       <div className="ml-6 mt-2 space-y-3">
-                        {placeDetails.reviews.slice(0, 3).map((review: any, index: number) => (
+                        {placeData.reviews.slice(0, 3).map((review, index) => (
                           <div key={index} className="border-l-2 border-gray-200 pl-3">
                             <div className="flex items-center gap-1">
                               <Star className="h-4 w-4 text-yellow-500" fill="currentColor" />
