@@ -49,14 +49,13 @@ const Index = () => {
 
   const handleSelect = (place: Place) => {
     try {
-      // Send the selected place data to the parent window
       window.parent.postMessage({
         type: 'PLACE_SELECTED',
         data: place
       }, '*');
       
       toast.success("Location details sent successfully!");
-      setIsOpen(false); // Close the dialog after selection
+      setIsOpen(false);
     } catch (error) {
       console.error("Error sending data to parent:", error);
       toast.error("Failed to send location details");
@@ -66,10 +65,12 @@ const Index = () => {
   return (
     <SidebarProvider>
       <div className="flex min-h-screen w-full bg-gray-50 relative">
-        <AppSidebar onSearch={handleSearch} isLoading={isLoading} />
+        <div className="fixed right-0 top-0 h-full">
+          <AppSidebar onSearch={handleSearch} isLoading={isLoading} />
+        </div>
         
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto fixed right-[320px] top-1/2 -translate-y-1/2">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-semibold">Search Results</h2>
               <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
