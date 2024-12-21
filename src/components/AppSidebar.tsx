@@ -26,8 +26,8 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
     const updateBounds = () => {
       const windowWidth = window.innerWidth;
       setBounds({
-        right: windowWidth - 64,
-        left: 0
+        right: 0,
+        left: -(windowWidth - 64) // This ensures the icon stays within the right border
       });
     };
 
@@ -71,7 +71,7 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
 
   return (
     <Draggable 
-      bounds={{ left: bounds.left, right: bounds.right }}
+      bounds={bounds}
       axis="x"
       position={position}
       onDrag={(e, data) => setPosition({ x: data.x, y: 0 })}
@@ -84,7 +84,7 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
           "bg-white rounded-lg shadow-lg"
         )}
         style={{ 
-          right: `${-position.x}px`,
+          right: 0,
         }}
       >
         <div 
