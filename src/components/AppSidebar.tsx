@@ -62,12 +62,12 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
 
   return (
     <Draggable 
-      bounds={{ left: 0, right: 236 }}
+      bounds={{ left: window.innerWidth - 300, right: window.innerWidth - 64 }}
       axis="x"
     >
       <div 
         className={cn(
-          "fixed left-0 z-50 transition-all duration-300 ease-in-out cursor-move",
+          "fixed right-0 z-50 transition-all duration-300 ease-in-out cursor-move",
           isExpanded ? "w-64" : "w-16",
           "bg-white rounded-lg shadow-lg"
         )}
@@ -84,7 +84,7 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
                 )}
               >
                 <Grid className="w-6 h-6 text-blue-500" />
-                <span className="text-sm font-medium">AI</span>
+                <span className={cn("text-sm font-medium", !isExpanded && "hidden")}>AI</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
 
