@@ -4,7 +4,6 @@ import PlaceCard from "@/components/PlaceCard";
 import { Button } from "@/components/ui/button";
 import { searchPlaces, type Place } from "@/services/placesApi";
 import { Loader2, X } from "lucide-react";
-import { SidebarProvider } from "@/components/ui/sidebar";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
 
@@ -63,8 +62,8 @@ const Index = () => {
   };
 
   return (
-    <div className="relative min-h-screen w-full">
-      <div className="fixed right-0 top-0 bottom-0">
+    <div className="h-screen w-full bg-background">
+      <div className="fixed right-0 top-0 bottom-0 z-50 w-16">
         <AppSidebar onSearch={handleSearch} isLoading={isLoading} />
       </div>
       
