@@ -50,7 +50,8 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
     }
   };
 
-  const toggleSearch = () => {
+  const toggleSearch = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event from bubbling up
     setShowSearch(!showSearch);
     if (!showSearch) {
       setIsExpanded(true);
@@ -78,6 +79,10 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
     }
   };
 
+  const handleSidebarClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent event from bubbling
+  };
+
   return (
     <Draggable 
       bounds={{ left: bounds.left, right: bounds.right }}
@@ -96,6 +101,7 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
         }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onClick={handleSidebarClick}
       >
         <div className="p-2">
           <SidebarMenu>
