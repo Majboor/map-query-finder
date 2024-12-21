@@ -51,7 +51,7 @@ const Index = () => {
       <div className="flex min-h-screen w-full bg-gray-50">
         <AppSidebar onSearch={handleSearch} isLoading={isLoading} />
         
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-8 ml-16">
           {isLoading && places.length === 0 && (
             <div className="flex justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
