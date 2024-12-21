@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Star, MapPin, Phone, Globe, ChevronDown, Send } from "lucide-react";
+import { Star, MapPin, Phone, Globe, ChevronDown, Send, Check } from "lucide-react";
 import type { Place } from "@/types/place";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
@@ -91,15 +91,26 @@ const PlaceCard = ({ place, onSelect }: PlaceCardProps) => {
             </Avatar>
             <span>{place["Business Name"]}</span>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleSelect}
-            className="h-8 w-8"
-            title="Send to main page"
-          >
-            <Send className="h-5 w-5" />
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSelect}
+              className="flex items-center gap-2"
+            >
+              <Check className="h-4 w-4" />
+              Select
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleSelect}
+              className="h-8 w-8"
+              title="Send to main page"
+            >
+              <Send className="h-5 w-5" />
+            </Button>
+          </div>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
