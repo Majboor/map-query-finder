@@ -87,10 +87,13 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
     >
       <div 
         className={cn(
-          "fixed top-0 right-0 z-50 h-screen transition-all duration-300 ease-in-out cursor-move",
+          "fixed top-0 z-50 h-screen transition-all duration-300 ease-in-out cursor-move",
           isExpanded ? "w-64" : "w-16",
           "bg-white rounded-l-lg shadow-lg"
         )}
+        style={{ 
+          right: `${-position.x}px`,
+        }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
@@ -100,13 +103,14 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
               <SidebarMenuButton
                 className={cn(
                   "w-full flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-all duration-300",
-                  isExpanded ? "justify-start" : "justify-center"
+                  isExpanded ? "justify-start" : "justify-start px-4"
                 )}
               >
                 <Grid className="w-6 h-6 text-blue-500" />
-                {isExpanded && (
-                  <span className="text-sm font-medium">AI</span>
-                )}
+                <span className={cn(
+                  "text-sm font-medium transition-opacity duration-300",
+                  isExpanded ? "opacity-100" : "opacity-0"
+                )}>AI</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
 
@@ -115,13 +119,14 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
                 onClick={toggleSearch}
                 className={cn(
                   "w-full flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-all duration-300",
-                  isExpanded ? "justify-start" : "justify-center"
+                  isExpanded ? "justify-start" : "justify-start px-4"
                 )}
               >
                 <Search className="w-6 h-6" />
-                {isExpanded && (
-                  <span className="text-sm font-medium">Look for listings</span>
-                )}
+                <span className={cn(
+                  "text-sm font-medium transition-opacity duration-300",
+                  isExpanded ? "opacity-100" : "opacity-0"
+                )}>Look for listings</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
 
@@ -129,13 +134,14 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
               <SidebarMenuButton
                 className={cn(
                   "w-full flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 transition-all duration-300",
-                  isExpanded ? "justify-start" : "justify-center"
+                  isExpanded ? "justify-start" : "justify-start px-4"
                 )}
               >
                 <MessageSquare className="w-6 h-6" />
-                {isExpanded && (
-                  <span className="text-sm font-medium">Chat</span>
-                )}
+                <span className={cn(
+                  "text-sm font-medium transition-opacity duration-300",
+                  isExpanded ? "opacity-100" : "opacity-0"
+                )}>Chat</span>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
