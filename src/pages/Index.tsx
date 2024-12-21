@@ -19,14 +19,17 @@ const Index = () => {
     if (isLoading) return;
     
     setIsLoading(true);
+    setIsOpen(true);
     setCurrentBrand(brand);
     setCurrentLocation(location);
+    
     try {
       const results = await searchPlaces({ brand, location });
       setPlaces(results);
-      setIsOpen(true);
     } catch (error) {
       console.error("Search error:", error);
+      toast.error("Failed to fetch results");
+      setIsOpen(false);
     } finally {
       setIsLoading(false);
     }
@@ -45,6 +48,7 @@ const Index = () => {
       setPlaces(newResults);
     } catch (error) {
       console.error("Load more error:", error);
+      toast.error("Failed to load more results");
     } finally {
       setIsLoading(false);
     }
@@ -70,21 +74,32 @@ const Index = () => {
       <AppSidebar onSearch={handleSearch} isLoading={isLoading} />
       
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="fixed left-[5.5rem] top-1/2 -translate-y-1/2 max-w-3xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="fixed inset-x-0 top-1/2 -translate-y-1/2 mx-auto max-w-3xl max-h-[80vh] overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-200">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">Search Results</h2>
-            <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setIsOpen(false)}
+              className="hover:bg-gray-100"
+            >
               <X className="h-4 w-4" />
             </Button>
           </div>
           
-          {isLoading && places.length === 0 && (
-            <div className="flex justify-center">
+          {isLoading && (
+            <div className="flex justify-center py-8">
               <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
             </div>
           )}
 
-          {places.length > 0 && (
+          {!isLoading && places.length === 0 && (
+            <div className="text-center py-8 text-gray-500">
+              No results found
+            </div>
+          )}
+
+          {!isLoading && places.length > 0 && (
             <div className="space-y-6">
               {places.map((place, index) => (
                 <div key={index} className="flex flex-col gap-2">
