@@ -21,7 +21,7 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
     const checkImage = async (url: string) => {
       try {
         const response = await fetch(url);
-        if (response.ok) {
+        if (response.ok && response.status !== 404) {
           setValidImage(url);
         } else {
           console.log(`Image validation failed for ${url}: ${response.status}`);
@@ -35,8 +35,9 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
 
     const validateFirstImage = async () => {
       setValidImage(null); // Reset validImage state before checking
-      if (place["Brand Images"]?.[0] && place["Brand Images"][0] !== 'N/A') {
-        await checkImage(place["Brand Images"][0]);
+      const firstImage = place["Brand Images"]?.[0];
+      if (firstImage && firstImage !== 'N/A') {
+        await checkImage(firstImage);
       }
     };
 
