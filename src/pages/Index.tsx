@@ -1,12 +1,14 @@
 import { useState } from "react";
-import SearchForm from "@/components/SearchForm";
+import { AppSidebar } from "@/components/AppSidebar";
 import PlaceCard from "@/components/PlaceCard";
 import { Button } from "@/components/ui/button";
 import { searchPlaces, type Place } from "@/services/placesApi";
 import { Loader2 } from "lucide-react";
+import { SidebarProvider } from "@/components/ui/sidebar";
 
 const Index = () => {
   const [places, setPlaces] = useState<Place[]>([]);
+  const [selectedPlaces, setSelectedPlaces] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [currentQuery, setCurrentQuery] = useState("");
   const [currentLocation, setCurrentLocation] = useState("");
@@ -32,47 +34,62 @@ const Index = () => {
     setIsLoading(false);
   };
 
+  const handleSelect = (place: Place) => {
+    setSelectedPlaces((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(place.name)) {
+        newSet.delete(place.name);
+      } else {
+        newSet.add(place.name);
+      }
+      return newSet;
+    });
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-4xl mx-auto space-y-8">
-        <h1 className="text-3xl font-bold text-center text-gray-900">
-          Place Search
-        </h1>
+    <SidebarProvider>
+      <div className="flex min-h-screen w-full bg-gray-50">
+        <AppSidebar onSearch={handleSearch} isLoading={isLoading} />
         
-        <SearchForm onSearch={handleSearch} isLoading={isLoading} />
-
-        {isLoading && places.length === 0 && (
-          <div className="flex justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
-          </div>
-        )}
-
-        {places.length > 0 && (
-          <div className="space-y-6">
-            {places.map((place, index) => (
-              <PlaceCard key={index} place={place} />
-            ))}
-            
+        <main className="flex-1 p-8">
+          {isLoading && places.length === 0 && (
             <div className="flex justify-center">
-              <Button
-                onClick={handleLoadMore}
-                disabled={isLoading}
-                variant="outline"
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Loading...
-                  </>
-                ) : (
-                  "Load More"
-                )}
-              </Button>
+              <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
             </div>
-          </div>
-        )}
+          )}
+
+          {places.length > 0 && (
+            <div className="space-y-6 max-w-3xl mx-auto">
+              {places.map((place, index) => (
+                <PlaceCard
+                  key={index}
+                  place={place}
+                  onSelect={handleSelect}
+                  isSelected={selectedPlaces.has(place.name)}
+                />
+              ))}
+              
+              <div className="flex justify-center">
+                <Button
+                  onClick={handleLoadMore}
+                  disabled={isLoading}
+                  variant="outline"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Loading...
+                    </>
+                  ) : (
+                    "Load More"
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+        </main>
       </div>
-    </div>
+    </SidebarProvider>
   );
 };
 

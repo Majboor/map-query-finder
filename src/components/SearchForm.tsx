@@ -18,9 +18,9 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 w-full max-w-2xl mx-auto">
-      <div className="flex flex-col sm:flex-row gap-4">
-        <div className="relative flex-1">
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="space-y-4">
+        <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
             name="query"
@@ -29,7 +29,7 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
             required
           />
         </div>
-        <div className="relative flex-1">
+        <div className="relative">
           <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
             name="location"
@@ -38,7 +38,7 @@ const SearchForm = ({ onSearch, isLoading }: SearchFormProps) => {
             required
           />
         </div>
-        <Button type="submit" disabled={isLoading}>
+        <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? "Searching..." : "Search"}
         </Button>
       </div>
