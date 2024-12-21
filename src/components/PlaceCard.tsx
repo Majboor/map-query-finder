@@ -6,7 +6,8 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import type { PlaceDetails, PlaceData } from "@/types/place";
+import type { PlaceDetails } from "@/types/place";
+import BusinessHours from "./BusinessHours";
 
 interface PlaceCardProps {
   place: Place;
@@ -17,14 +18,14 @@ interface PlaceCardProps {
 const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const { data: details, isLoading: isLoadingDetails } = useQuery<PlaceDetails>({
+  const { data: details, isLoading: isLoadingDetails } = useQuery({
     queryKey: ['placeDetails', place.name],
     queryFn: async () => {
       console.log('Fetching details for:', place.name);
       try {
         const params = {
           query: place.name,
-          limit: '1',
+          limit: '10',
           language: 'en',
           region: 'AU',
           async: 'false',
@@ -58,7 +59,26 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
 
         const data = await response.json();
         console.log('API Response:', data);
-        return data;
+        
+        // Process working hours from popular_times if available
+        if (data?.data?.[0]?.[0]?.popular_times) {
+          const workingHours: Record<string, string> = {};
+          data.data[0][0].popular_times.forEach((dayInfo: any) => {
+            const dayText = dayInfo.day_text.toLowerCase();
+            const hours = dayInfo.popular_times;
+            if (hours && hours.length > 0) {
+              const openTimes = hours.filter((h: any) => h.percentage > 0);
+              if (openTimes.length > 0) {
+                workingHours[dayText] = `${openTimes[0].time}-${openTimes[openTimes.length - 1].time}`;
+              } else {
+                workingHours[dayText] = 'Closed';
+              }
+            }
+          });
+          data.data[0][0].working_hours = workingHours;
+        }
+        
+        return data as PlaceDetails;
       } catch (error) {
         console.error('Error fetching place details:', error);
         throw error;
@@ -68,7 +88,10 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
     retry: 1,
   });
 
-  const placeData: PlaceData | undefined = details?.data?.[0]?.[0];
+  const placeData = details?.data?.[0]?.[0];
+  const workingHours = placeData?.working_hours ? Object.entries(placeData.working_hours).map(
+    ([day, hours]) => `${day}: ${hours}`
+  ) : [];
 
   return (
     <Card className="w-full">
@@ -146,18 +169,8 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
                       Price Level: {'$'.repeat(placeData.price_level)}
                     </p>
                   )}
-                  {placeData.working_hours && Object.keys(placeData.working_hours).length > 0 && (
-                    <div className="text-sm">
-                      <Clock className="inline-block h-4 w-4 mr-2" />
-                      <span className="font-medium">Opening Hours:</span>
-                      <ul className="ml-6 mt-1">
-                        {Object.entries(placeData.working_hours).map(([day, hours]) => (
-                          <li key={day} className="capitalize">
-                            {day}: {hours}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                  {workingHours.length > 0 && (
+                    <BusinessHours hours={workingHours} />
                   )}
                   {placeData.reviews && placeData.reviews.length > 0 && (
                     <div className="text-sm mt-4">

@@ -1,6 +1,6 @@
 export interface PlaceDetails {
   status: string;
-  data: Array<PlaceData>;
+  data: Array<Array<PlaceData>>;
 }
 
 export interface PlaceData {
