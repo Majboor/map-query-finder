@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 
 const API_BASE_URL = "https://api.app.outscraper.com/maps/search-v3";
+const API_KEY = "YjE5YzI1NzQ0MTRjNGQwOWJmYzU3YzZmNmU5NDZiNTZ8N2Y5YWRkMjA2Ng";
 
 export interface SearchParams {
   query: string;
@@ -29,7 +30,7 @@ export const searchPlaces = async ({ query, location, limit = 1, skipPlaces = 0 
 
     const response = await fetch(`${API_BASE_URL}?${params}`, {
       headers: {
-        "X-API-KEY": "YOUR-API-KEY", // Replace with actual API key handling
+        "X-API-KEY": API_KEY,
       },
     });
 
@@ -41,6 +42,7 @@ export const searchPlaces = async ({ query, location, limit = 1, skipPlaces = 0 
     return data.data[0] as Place[];
   } catch (error) {
     toast.error("Error fetching places");
+    console.error("Places API Error:", error);
     return [];
   }
 }
