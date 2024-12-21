@@ -1,19 +1,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Star, MapPin, Phone, Globe, ChevronDown, CheckSquare, Square } from "lucide-react";
+import { Star, MapPin, Phone, Globe, ChevronDown, Send } from "lucide-react";
 import type { Place } from "@/types/place";
 import { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import PlaceDetailsComponent from "./PlaceDetails";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { toast } from "sonner";
 
 interface PlaceCardProps {
   place: Place;
   onSelect?: (place: Place) => void;
-  isSelected?: boolean;
 }
 
-const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
+const PlaceCard = ({ place, onSelect }: PlaceCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [validImage, setValidImage] = useState<string | null>(null);
   const [validImages, setValidImages] = useState<string[]>([]);
@@ -64,8 +64,10 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
     if (onSelect) {
       try {
         onSelect(place);
+        toast.success("Location details sent successfully!");
       } catch (error) {
         console.error("Error in select handler:", error);
+        toast.error("Failed to send location details");
       }
     }
   };
@@ -89,20 +91,15 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
             </Avatar>
             <span>{place["Business Name"]}</span>
           </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSelect}
-              className="h-8 w-8"
-            >
-              {isSelected ? (
-                <CheckSquare className="h-5 w-5" />
-              ) : (
-                <Square className="h-5 w-5" />
-              )}
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleSelect}
+            className="h-8 w-8"
+            title="Send to main page"
+          >
+            <Send className="h-5 w-5" />
+          </Button>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-2">
