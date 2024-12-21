@@ -19,15 +19,15 @@ interface AppSidebarProps {
 export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
-  const [bounds, setBounds] = useState({ right: 0, left: 0 });
+  const [bounds, setBounds] = useState({ top: 0, bottom: 0 });
   const [position, setPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     const updateBounds = () => {
-      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
       setBounds({
-        right: 0,
-        left: -(windowWidth - 64) // This ensures the icon stays within the right border
+        top: 0,
+        bottom: windowHeight - 64 // This ensures the icon stays within the bottom border
       });
     };
 
@@ -72,19 +72,19 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
   return (
     <Draggable 
       bounds={bounds}
-      axis="x"
+      axis="y"
       position={position}
-      onDrag={(e, data) => setPosition({ x: data.x, y: 0 })}
+      onDrag={(e, data) => setPosition({ x: 0, y: data.y })}
       handle=".drag-handle"
     >
       <div 
         className={cn(
-          "fixed top-4 z-50 transition-all duration-300 ease-in-out",
+          "fixed right-4 z-50 transition-all duration-300 ease-in-out",
           isExpanded ? "w-64" : "w-12",
           "bg-white rounded-lg shadow-lg"
         )}
         style={{ 
-          right: 0,
+          top: 0,
         }}
       >
         <div 
