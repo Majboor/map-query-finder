@@ -6,6 +6,7 @@ import { searchPlaces, type Place } from "@/services/placesApi";
 import { Loader2, X } from "lucide-react";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 const Index = () => {
   const [places, setPlaces] = useState<Place[]>([]);
@@ -47,15 +48,19 @@ const Index = () => {
   };
 
   const handleSelect = (place: Place) => {
-    setSelectedPlaces((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(place["Business Name"])) {
-        newSet.delete(place["Business Name"]);
-      } else {
-        newSet.add(place["Business Name"]);
-      }
-      return newSet;
-    });
+    try {
+      // Send the selected place data to the parent window
+      window.parent.postMessage({
+        type: 'PLACE_SELECTED',
+        data: place
+      }, '*');
+      
+      toast.success("Location details sent successfully!");
+      setIsOpen(false); // Close the dialog after selection
+    } catch (error) {
+      console.error("Error sending data to parent:", error);
+      toast.error("Failed to send location details");
+    }
   };
 
   return (
@@ -81,12 +86,18 @@ const Index = () => {
             {places.length > 0 && (
               <div className="space-y-6">
                 {places.map((place, index) => (
-                  <PlaceCard
-                    key={index}
-                    place={place}
-                    onSelect={handleSelect}
-                    isSelected={selectedPlaces.has(place["Business Name"])}
-                  />
+                  <div key={index} className="flex flex-col gap-2">
+                    <PlaceCard
+                      place={place}
+                      isSelected={selectedPlaces.has(place["Business Name"])}
+                    />
+                    <Button 
+                      onClick={() => handleSelect(place)}
+                      className="w-full"
+                    >
+                      Select This Location
+                    </Button>
+                  </div>
                 ))}
                 
                 <div className="flex justify-center">
