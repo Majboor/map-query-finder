@@ -16,32 +16,48 @@ interface PlaceCardProps {
 const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [validImage, setValidImage] = useState<string | null>(null);
+  const [validImages, setValidImages] = useState<string[]>([]);
 
   useEffect(() => {
     const checkImage = async (url: string) => {
       try {
         const response = await fetch(url);
         if (response.ok && response.status !== 404) {
-          setValidImage(url);
-        } else {
-          console.log(`Image validation failed for ${url}: ${response.status}`);
-          setValidImage(null);
+          return true;
         }
+        console.log(`Image validation failed for ${url}: ${response.status}`);
+        return false;
       } catch (error) {
         console.error("Error checking image:", error);
-        setValidImage(null);
+        return false;
       }
     };
 
-    const validateFirstImage = async () => {
-      setValidImage(null); // Reset validImage state before checking
-      const firstImage = place["Brand Images"]?.[0];
-      if (firstImage && firstImage !== 'N/A') {
-        await checkImage(firstImage);
+    const validateImages = async () => {
+      setValidImage(null);
+      setValidImages([]);
+      
+      const images = place["Brand Images"]?.filter(img => img !== 'N/A') || [];
+      const validatedImages = [];
+      
+      for (const image of images) {
+        const isValid = await checkImage(image);
+        if (isValid) {
+          validatedImages.push(image);
+        }
+      }
+      
+      // Set the first valid image as the avatar image
+      if (validatedImages.length > 0) {
+        setValidImage(validatedImages[0]);
+        // Remove the first image from the array for PlaceDetails
+        setValidImages(validatedImages.slice(1));
       }
     };
 
-    validateFirstImage();
+    if (place["Brand Images"]?.length) {
+      validateImages();
+    }
   }, [place]);
 
   const handleSelect = () => {
@@ -54,10 +70,10 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
     }
   };
 
-  // Filter out the validImage from Brand Images before passing to PlaceDetails
+  // Create a new place object with filtered Brand Images
   const filteredPlace = {
     ...place,
-    "Brand Images": place["Brand Images"].filter(img => img !== validImage && img !== 'N/A')
+    "Brand Images": validImages
   };
 
   return (
