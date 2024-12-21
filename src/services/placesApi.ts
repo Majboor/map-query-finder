@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 import type { Place, PlaceApiResponse } from "@/types/place";
 
-const API_BASE_URL = "http://45.90.122.221:5001";
+const API_BASE_URL = "https://api.app.outscraper.com/maps/search-v3"; // Updated to Outscraper API URL
 
 export interface SearchParams {
   brand: string;
@@ -38,15 +38,24 @@ export { type Place };
 export const searchPlaces = async ({ brand, location, limit = 5 }: SearchParams): Promise<Place[]> => {
   try {
     const params = new URLSearchParams({
-      brand,
-      location,
-      limit: limit.toString()
+      query: `${brand} ${location}`,
+      limit: limit.toString(),
+      async: "false",
+      language: "en",
+      region: "AU",
+      dropDuplicates: "true"
     });
 
-    console.log("API Request URL:", `${API_BASE_URL}/search?${params}`);
+    const API_KEY = "YjE5YzI1NzQ0MTRjNGQwOWJmYzU3YzZmNmU5NDZiNTZ8N2Y5YWRkMjA2Ng";
+
+    console.log("API Request URL:", `${API_BASE_URL}?${params}`);
     console.log("Query Parameters:", Object.fromEntries(params));
 
-    const response = await fetch(`${API_BASE_URL}/search?${params}`);
+    const response = await fetch(`${API_BASE_URL}?${params}`, {
+      headers: {
+        "X-API-KEY": API_KEY,
+      },
+    });
 
     if (!response.ok) {
       if (response.status === 400) {
