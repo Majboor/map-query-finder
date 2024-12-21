@@ -9,7 +9,6 @@ import { toast } from "sonner";
 
 const Index = () => {
   const [places, setPlaces] = useState<Place[]>([]);
-  const [selectedPlaces, setSelectedPlaces] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
   const [currentBrand, setCurrentBrand] = useState("");
   const [currentLocation, setCurrentLocation] = useState("");
@@ -105,7 +104,6 @@ const Index = () => {
                 <div key={index} className="flex flex-col gap-2">
                   <PlaceCard
                     place={place}
-                    isSelected={selectedPlaces.has(place["Business Name"])}
                     onSelect={handleSelect}
                   />
                 </div>
