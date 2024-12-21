@@ -63,10 +63,15 @@ const PlaceCard = ({ place, onSelect }: PlaceCardProps) => {
   const handleSelect = () => {
     if (onSelect) {
       try {
+        window.parent.postMessage({
+          type: 'PLACE_SELECTED',
+          data: place
+        }, '*');
+        
         onSelect(place);
         toast.success("Location details sent successfully!");
       } catch (error) {
-        console.error("Error in select handler:", error);
+        console.error("Error sending data to parent:", error);
         toast.error("Failed to send location details");
       }
     }
