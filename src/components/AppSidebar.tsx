@@ -27,7 +27,7 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
       const windowHeight = window.innerHeight;
       setBounds({
         top: 0,
-        bottom: windowHeight - 64 // This ensures the icon stays within the bottom border
+        bottom: windowHeight - 64
       });
     };
 
@@ -40,6 +40,17 @@ export function AppSidebar({ onSearch, isLoading }: AppSidebarProps) {
     e.preventDefault();
     e.stopPropagation();
     setIsExpanded(!isExpanded);
+    
+    try {
+      window.parent.postMessage({
+        type: 'SIDEBAR_TOGGLE',
+        data: { isExpanded: !isExpanded }
+      }, '*');
+      toast.success("AI Assistant toggled successfully!");
+    } catch (error) {
+      console.error("Error sending data to parent:", error);
+      toast.error("Failed to communicate with parent window");
+    }
   };
 
   const toggleSearch = (e: React.MouseEvent) => {
