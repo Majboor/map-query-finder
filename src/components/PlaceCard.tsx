@@ -30,10 +30,7 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
       }
       const data = await response.json();
       console.log('API Response:', data);
-      if (!data.data?.[0]?.[0]) {
-        throw new Error('No details found');
-      }
-      return data.data[0][0];
+      return data;
     },
     enabled: isExpanded,
     retry: 1,
@@ -103,35 +100,42 @@ const PlaceCard = ({ place, onSelect, isSelected = false }: PlaceCardProps) => {
                 </div>
               ) : details ? (
                 <>
-                  {details.business_status && (
+                  <div className="bg-gray-100 p-4 rounded-md overflow-x-auto">
+                    <pre className="text-xs whitespace-pre-wrap">
+                      {JSON.stringify(details, null, 2)}
+                    </pre>
+                  </div>
+                  
+                  {/* Keep existing detailed view code */}
+                  {details.data?.[0]?.[0]?.business_status && (
                     <p className="text-sm">
                       <Info className="inline-block h-4 w-4 mr-2" />
-                      Status: {details.business_status}
+                      Status: {details.data[0][0].business_status}
                     </p>
                   )}
-                  {details.price_level && (
+                  {details.data?.[0]?.[0]?.price_level && (
                     <p className="text-sm">
                       <DollarSign className="inline-block h-4 w-4 mr-2" />
-                      Price Level: {'$'.repeat(details.price_level)}
+                      Price Level: {'$'.repeat(details.data[0][0].price_level)}
                     </p>
                   )}
-                  {details.business_hours && (
+                  {details.data?.[0]?.[0]?.business_hours && (
                     <div className="text-sm">
                       <Clock className="inline-block h-4 w-4 mr-2" />
                       <span className="font-medium">Opening Hours:</span>
                       <ul className="ml-6 mt-1">
-                        {details.business_hours.map((hour: string, index: number) => (
+                        {details.data[0][0].business_hours.map((hour: string, index: number) => (
                           <li key={index}>{hour}</li>
                         ))}
                       </ul>
                     </div>
                   )}
-                  {details.reviews && details.reviews.length > 0 && (
+                  {details.data?.[0]?.[0]?.reviews && Array.isArray(details.data[0][0].reviews) && details.data[0][0].reviews.length > 0 && (
                     <div className="text-sm mt-4">
                       <Users className="inline-block h-4 w-4 mr-2" />
                       <span className="font-medium">Recent Reviews:</span>
                       <div className="ml-6 mt-2 space-y-3">
-                        {details.reviews.slice(0, 3).map((review: any, index: number) => (
+                        {details.data[0][0].reviews.slice(0, 3).map((review: any, index: number) => (
                           <div key={index} className="border-l-2 border-gray-200 pl-3">
                             <div className="flex items-center gap-1">
                               <Star className="h-4 w-4 text-yellow-500" fill="currentColor" />
