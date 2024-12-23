@@ -17,18 +17,25 @@ interface ApiUsage {
   total_tokens: number;
 }
 
+const TOGETHER_API_KEY = localStorage.getItem('TOGETHER_API_KEY') || '';
+
 const Together = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [apiUsage, setApiUsage] = useState<ApiUsage | null>(null);
+  const [apiKey, setApiKey] = useState(TOGETHER_API_KEY);
 
   const handleSend = async () => {
     if (!input.trim()) return;
+    if (!apiKey) {
+      toast.error("Please enter your Together AI API key first");
+      return;
+    }
 
     try {
       setIsLoading(true);
-      const userMessage = { role: "user", content: input };
+      const userMessage: Message = { role: "user", content: input };
       setMessages(prev => [...prev, userMessage]);
       setInput("");
 
@@ -36,7 +43,7 @@ const Together = () => {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": "Bearer YOUR_TOGETHER_API_KEY"
+          "Authorization": `Bearer ${apiKey}`
         },
         body: JSON.stringify({
           model: "mistralai/Mixtral-8x7B-Instruct-v0.1",
@@ -81,7 +88,6 @@ const Together = () => {
           }
 
           const placesData = await placesResponse.json();
-          // Add the places data to the conversation
           setMessages(prev => [...prev, {
             role: "assistant",
             content: JSON.stringify(placesData.data[0], null, 2)
@@ -102,6 +108,11 @@ const Together = () => {
         });
       }
 
+      // Save API key if request was successful
+      if (apiKey !== TOGETHER_API_KEY) {
+        localStorage.setItem('TOGETHER_API_KEY', apiKey);
+      }
+
       toast.success("Response received successfully!");
     } catch (error) {
       console.error("Error:", error);
@@ -116,6 +127,16 @@ const Together = () => {
       <Card className="min-h-[600px] flex flex-col">
         <CardHeader>
           <CardTitle>AI Assistant</CardTitle>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Together AI API Key</label>
+            <Input
+              type="password"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder="Enter your Together AI API key..."
+              className="font-mono"
+            />
+          </div>
           {apiUsage && (
             <div className="text-sm text-muted-foreground">
               Tokens: {apiUsage.prompt_tokens} prompt + {apiUsage.completion_tokens} completion = {apiUsage.total_tokens} total
@@ -151,7 +172,7 @@ const Together = () => {
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSend()}
+              onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
               placeholder="Type your message..."
               disabled={isLoading}
             />
