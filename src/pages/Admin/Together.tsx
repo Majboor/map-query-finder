@@ -5,18 +5,29 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
-import { proxyTogetherApi } from "@/api/together";
-
-interface Message {
-  role: "user" | "assistant" | "system";
-  content: string;
-}
+import { callTogetherApi } from "@/services/togetherApi";
+import { Message, Tool } from "@/types/together";
 
 interface ApiUsage {
   prompt_tokens: number;
   completion_tokens: number;
   total_tokens: number;
 }
+
+const placesApiTool: Tool = {
+  type: "function",
+  function: {
+    name: "get_place_details",
+    description: "Fetch details about a place from the Places API",
+    parameters: {
+      type: "object",
+      properties: {
+        query: { type: "string", description: "Search query for the place" },
+        location: { type: "string", description: "Location for the search" }
+      }
+    }
+  }
+};
 
 const TOGETHER_API_KEY = localStorage.getItem('TOGETHER_API_KEY') || '';
 
@@ -40,18 +51,20 @@ const Together = () => {
       setMessages(prev => [...prev, userMessage]);
       setInput("");
 
-      const data = await proxyTogetherApi([...messages, userMessage], apiKey);
+      const data = await callTogetherApi([...messages, userMessage], apiKey, [placesApiTool]);
       
-      // Handle function calls if present
       if (data.choices[0].message.tool_calls) {
         const toolCall = data.choices[0].message.tool_calls[0];
         if (toolCall.function.name === "get_place_details") {
           const args = JSON.parse(toolCall.function.arguments);
-          const placesResponse = await fetch(`https://api.app.outscraper.com/maps/search-v3?query=${encodeURIComponent(args.query)}, ${encodeURIComponent(args.location)}&limit=1&async=false`, {
-            headers: {
-              "X-API-KEY": "YjE5YzI1NzQ0MTRjNGQwOWJmYzU3YzZmNmU5NDZiNTZ8N2Y5YWRkMjA2Ng"
+          const placesResponse = await fetch(
+            `https://api.app.outscraper.com/maps/search-v3?query=${encodeURIComponent(args.query)}, ${encodeURIComponent(args.location)}&limit=1&async=false`,
+            {
+              headers: {
+                "X-API-KEY": "YjE5YzI1NzQ0MTRjNGQwOWJmYzU3YzZmNmU5NDZiNTZ8N2Y5YWRkMjA2Ng"
+              }
             }
-          });
+          );
 
           if (!placesResponse.ok) {
             throw new Error("Failed to get response from Places API");
@@ -61,14 +74,14 @@ const Together = () => {
           setMessages(prev => [...prev, {
             role: "assistant",
             content: JSON.stringify(placesData.data[0], null, 2)
-          } as Message]);
+          }]);
         }
       }
 
       setMessages(prev => [...prev, {
         role: "assistant",
         content: data.choices[0].message.content
-      } as Message]);
+      }]);
 
       if (data.usage) {
         setApiUsage({
@@ -84,7 +97,7 @@ const Together = () => {
       }
 
       toast.success("Response received successfully!");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error:", error);
       toast.error("Failed to get response");
     } finally {
