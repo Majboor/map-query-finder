@@ -91,14 +91,14 @@ const Together = () => {
           setMessages(prev => [...prev, {
             role: "assistant",
             content: JSON.stringify(placesData.data[0], null, 2)
-          }]);
+          } as Message]);
         }
       }
 
       setMessages(prev => [...prev, {
         role: "assistant",
         content: data.choices[0].message.content
-      }]);
+      } as Message]);
 
       if (data.usage) {
         setApiUsage({
