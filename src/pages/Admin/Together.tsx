@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Loader2, Send } from "lucide-react";
 import { toast } from "sonner";
+import { proxyTogetherApi } from "@/api/together";
 
 interface Message {
   role: "user" | "assistant" | "system";
@@ -39,38 +40,7 @@ const Together = () => {
       setMessages(prev => [...prev, userMessage]);
       setInput("");
 
-      const response = await fetch("https://api.together.xyz/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: "mistralai/Mixtral-8x7B-Instruct-v0.1",
-          messages: [...messages, userMessage],
-          tools: [{
-            type: "function",
-            function: {
-              name: "get_place_details",
-              description: "Fetch details about a place from the Places API",
-              parameters: {
-                type: "object",
-                properties: {
-                  query: { type: "string", description: "Search query for the place" },
-                  location: { type: "string", description: "Location for the search" }
-                }
-              }
-            }
-          }],
-          tool_choice: "auto"
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to get response from Together API");
-      }
-
-      const data = await response.json();
+      const data = await proxyTogetherApi([...messages, userMessage], apiKey);
       
       // Handle function calls if present
       if (data.choices[0].message.tool_calls) {
