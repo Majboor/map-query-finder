@@ -1,18 +1,17 @@
 import { useState } from "react";
-import { AppSidebar } from "@/components/AppSidebar";
-import PlaceCard from "@/components/PlaceCard";
+import { Search, MessageSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { searchPlaces, type Place } from "@/services/placesApi";
-import { Loader2, X } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
+import PlaceCard from "@/components/PlaceCard";
+import SearchForm from "@/components/SearchForm";
+import { searchPlaces, type Place } from "@/services/placesApi";
 
 const Index = () => {
   const [places, setPlaces] = useState<Place[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [currentBrand, setCurrentBrand] = useState("");
-  const [currentLocation, setCurrentLocation] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
 
   const handleSearch = async (brand: string, location: string) => {
     if (isLoading) return;
@@ -34,25 +33,6 @@ const Index = () => {
       console.error("Search error:", error);
       toast.error("Failed to fetch results");
       setIsOpen(false);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleLoadMore = async () => {
-    if (isLoading) return;
-    
-    setIsLoading(true);
-    try {
-      const newResults = await searchPlaces({
-        brand: currentBrand,
-        location: currentLocation,
-        limit: places.length + 5,
-      });
-      setPlaces(newResults);
-    } catch (error) {
-      console.error("Load more error:", error);
-      toast.error("Failed to load more results");
     } finally {
       setIsLoading(false);
     }
@@ -81,64 +61,61 @@ const Index = () => {
   };
 
   return (
-    <div className="h-screen w-full bg-background">
-      <AppSidebar onSearch={handleSearch} isLoading={isLoading} />
-      
-      <Dialog open={isOpen} onOpenChange={handleDialogChange}>
-        <DialogContent className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[calc(100%-2rem)] sm:w-[calc(100%-4rem)] md:w-full md:max-w-3xl max-h-[80vh] md:max-h-[85vh] overflow-y-auto animate-in fade-in-0 zoom-in-95 duration-200 p-4 sm:p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg sm:text-xl font-semibold">Search Results</h2>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => handleDialogChange(false)}
-              className="hover:bg-gray-100"
-            >
-              <X className="h-4 w-4" />
-            </Button>
-          </div>
+    <div className="h-screen w-full bg-background flex items-center justify-center">
+      <div className="space-y-4 p-6 bg-white rounded-lg shadow-lg w-full max-w-md">
+        <h1 className="text-2xl font-bold text-center mb-8">Welcome</h1>
+        
+        <div className="grid grid-cols-2 gap-4">
+          <Button
+            variant="outline"
+            size="lg"
+            className="w-full h-32 flex flex-col items-center justify-center gap-2"
+            onClick={() => setShowSearch(true)}
+          >
+            <Search className="h-8 w-8" />
+            <span>Search Listings</span>
+          </Button>
           
-          {isLoading && (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-8 w-4 animate-spin text-gray-500" />
-            </div>
-          )}
+          <Button
+            variant="outline"
+            size="lg"
+            className="w-full h-32 flex flex-col items-center justify-center gap-2"
+            onClick={() => window.location.href = '/admin/together'}
+          >
+            <MessageSquare className="h-8 w-8" />
+            <span>Chat</span>
+          </Button>
+        </div>
+      </div>
 
-          {!isLoading && places.length === 0 && (
-            <div className="text-center py-8 text-gray-500">
-              No results found
-            </div>
-          )}
+      {/* Search Dialog */}
+      <Dialog open={showSearch} onOpenChange={setShowSearch}>
+        <DialogContent className="sm:max-w-md">
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold">Search Listings</h2>
+            <SearchForm onSearch={handleSearch} isLoading={isLoading} />
+          </div>
+        </DialogContent>
+      </Dialog>
 
-          {!isLoading && places.length > 0 && (
-            <div className="space-y-4 sm:space-y-6">
-              {places.map((place, index) => (
-                <div key={index} className="flex flex-col gap-2">
-                  <PlaceCard
-                    place={place}
-                    onSelect={handleSelect}
-                  />
-                </div>
-              ))}
-              
-              <div className="flex justify-center pt-2">
-                <Button
-                  onClick={handleLoadMore}
-                  disabled={isLoading}
-                  variant="outline"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Loading...
-                    </>
-                  ) : (
-                    "Load More"
-                  )}
-                </Button>
+      {/* Results Dialog */}
+      <Dialog open={isOpen} onOpenChange={handleDialogChange}>
+        <DialogContent className="sm:max-w-xl max-h-[80vh] overflow-y-auto">
+          <div className="space-y-4">
+            <h2 className="text-lg font-semibold">Search Results</h2>
+            {isLoading && (
+              <div className="flex justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
               </div>
-            </div>
-          )}
+            )}
+            {!isLoading && places.map((place, index) => (
+              <PlaceCard 
+                key={index}
+                place={place}
+                onSelect={handleSelect}
+              />
+            ))}
+          </div>
         </DialogContent>
       </Dialog>
     </div>
