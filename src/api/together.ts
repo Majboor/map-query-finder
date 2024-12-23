@@ -1,10 +1,15 @@
 export async function proxyTogetherApi(messages: any[], apiKey: string) {
   try {
-    const response = await fetch("https://api.together.xyz/v1/chat/completions", {
+    // Using cors-proxy.io as a CORS proxy
+    const PROXY_URL = "https://cors-proxy.io/";
+    const API_URL = "https://api.together.xyz/v1/chat/completions";
+    
+    const response = await fetch(PROXY_URL + API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
+        "Authorization": `Bearer ${apiKey}`,
+        "x-requested-with": "XMLHttpRequest"
       },
       body: JSON.stringify({
         model: "mistralai/Mixtral-8x7B-Instruct-v0.1",
