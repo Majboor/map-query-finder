@@ -1,15 +1,14 @@
 export async function proxyTogetherApi(messages: any[], apiKey: string) {
   try {
-    // Using cors-proxy.io as a CORS proxy
-    const PROXY_URL = "https://cors-proxy.io/";
-    const API_URL = "https://api.together.xyz/v1/chat/completions";
+    // Using api.allorigins.win as our CORS proxy - it's more reliable for authenticated requests
+    const PROXY_URL = "https://api.allorigins.win/raw?url=";
+    const API_URL = encodeURIComponent("https://api.together.xyz/v1/chat/completions");
     
     const response = await fetch(PROXY_URL + API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${apiKey}`,
-        "x-requested-with": "XMLHttpRequest"
       },
       body: JSON.stringify({
         model: "mistralai/Mixtral-8x7B-Instruct-v0.1",
