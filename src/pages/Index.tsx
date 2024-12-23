@@ -63,7 +63,7 @@ const Index = () => {
   return (
     <div className="h-screen w-full bg-background flex items-center justify-center">
       <div className="space-y-4 p-6 bg-white rounded-lg shadow-lg w-full max-w-md">
-        <h1 className="text-2xl font-bold text-center mb-8">Welcome</h1>
+        <h1 className="text-2xl font-bold text-center mb-8">AI</h1>
         
         <div className="grid grid-cols-2 gap-4">
           <Button
